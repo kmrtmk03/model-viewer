@@ -47,10 +47,20 @@ export interface ViewerSettings {
   lightElevation: number
   /** ライト距離 */
   lightDistance: number
+  /** ディレクショナルライト有効 */
+  directionalLightEnabled: boolean
+  /** ディレクショナルライトの色 */
+  directionalLightColor: string
+  /** ディレクショナルライトの強度 */
+  directionalLightIntensity: number
   /** 選択中のHDRIインデックス */
   hdriIndex: number
   /** HDRI回転角度（度） */
   hdriRotation: number
+  /** HDRI環境光の強度 */
+  hdriIntensity: number
+  /** HDRI有効フラグ */
+  hdriEnabled: boolean
 }
 
 /**

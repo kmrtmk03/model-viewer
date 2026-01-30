@@ -24,6 +24,7 @@ interface SliderConfig {
   value: number
   min: number
   max: number
+  step?: number
   unit?: string
   onChange: (value: number) => void
 }
@@ -39,18 +40,34 @@ interface SelectConfig {
 }
 
 /**
+ * カラー設定
+ */
+interface ColorConfig {
+  label: string
+  value: string
+  onChange: (color: string) => void
+}
+
+/**
  * フックの戻り値
  */
 interface UseControlPanelReturn {
   /** チェックボックス設定 */
   checkboxes: CheckboxConfig[]
+  /** 背景色設定 */
+  background: ColorConfig
   /** HDRI設定 */
   hdri: {
+    enabled: CheckboxConfig
     select: SelectConfig
     rotation: SliderConfig
+    intensity: SliderConfig
   }
   /** ライト設定 */
   light: {
+    enabled: CheckboxConfig
+    color: ColorConfig
+    intensity: SliderConfig
     azimuth: SliderConfig
     elevation: SliderConfig
     distance: SliderConfig
@@ -65,11 +82,17 @@ interface ControlPanelHandlers {
   onToggleGrid: () => void
   onToggleAxes: () => void
   onToggleAutoRotate: () => void
+  onBackgroundColorChange: (color: string) => void
   onLightAzimuthChange: (value: number) => void
   onLightElevationChange: (value: number) => void
   onLightDistanceChange: (value: number) => void
+  onToggleDirectionalLight: () => void
+  onDirectionalLightColorChange: (color: string) => void
+  onDirectionalLightIntensityChange: (value: number) => void
   onHdriIndexChange: (index: number) => void
   onHdriRotationChange: (value: number) => void
+  onHdriIntensityChange: (value: number) => void
+  onToggleHdri: () => void
 }
 
 /**
@@ -87,11 +110,17 @@ export const useControlPanel = (
     showGrid,
     showAxes,
     autoRotate,
+    backgroundColor,
     lightAzimuth,
     lightElevation,
     lightDistance,
+    directionalLightEnabled,
+    directionalLightColor,
+    directionalLightIntensity,
     hdriIndex,
     hdriRotation,
+    hdriIntensity,
+    hdriEnabled,
   } = settings
 
   // チェックボックス設定
@@ -102,6 +131,13 @@ export const useControlPanel = (
     { label: '自動回転', checked: autoRotate, onChange: handlers.onToggleAutoRotate },
   ], [wireframe, showGrid, showAxes, autoRotate, handlers])
 
+  // 背景色設定
+  const background = useMemo<ColorConfig>(() => ({
+    label: '背景色',
+    value: backgroundColor,
+    onChange: handlers.onBackgroundColorChange,
+  }), [backgroundColor, handlers])
+
   // HDRI選択オプション
   const hdriOptions = useMemo(() =>
     HDRI_LIST.map(item => ({ value: item.id, label: item.name })),
@@ -110,6 +146,11 @@ export const useControlPanel = (
 
   // HDRI設定
   const hdri = useMemo(() => ({
+    enabled: {
+      label: 'HDRI環境マップ',
+      checked: hdriEnabled,
+      onChange: handlers.onToggleHdri,
+    },
     select: {
       label: 'HDRI',
       value: hdriIndex,
@@ -124,10 +165,36 @@ export const useControlPanel = (
       unit: '°',
       onChange: handlers.onHdriRotationChange,
     },
-  }), [hdriIndex, hdriRotation, hdriOptions, handlers])
+    intensity: {
+      label: '強度',
+      value: hdriIntensity,
+      min: 0,
+      max: 2,
+      step: 0.1,
+      onChange: handlers.onHdriIntensityChange,
+    },
+  }), [hdriIndex, hdriRotation, hdriIntensity, hdriEnabled, hdriOptions, handlers])
 
   // ライト設定
   const light = useMemo(() => ({
+    enabled: {
+      label: 'ディレクショナルライト',
+      checked: directionalLightEnabled,
+      onChange: handlers.onToggleDirectionalLight,
+    },
+    color: {
+      label: 'ライト色',
+      value: directionalLightColor,
+      onChange: handlers.onDirectionalLightColorChange,
+    },
+    intensity: {
+      label: '強度',
+      value: directionalLightIntensity,
+      min: 0,
+      max: 3,
+      step: 0.1,
+      onChange: handlers.onDirectionalLightIntensityChange,
+    },
     azimuth: {
       label: '方位角',
       value: lightAzimuth,
@@ -151,10 +218,11 @@ export const useControlPanel = (
       max: 30,
       onChange: handlers.onLightDistanceChange,
     },
-  }), [lightAzimuth, lightElevation, lightDistance, handlers])
+  }), [lightAzimuth, lightElevation, lightDistance, directionalLightEnabled, directionalLightColor, directionalLightIntensity, handlers])
 
   return {
     checkboxes,
+    background,
     hdri,
     light,
   }

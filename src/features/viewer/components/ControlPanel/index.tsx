@@ -16,11 +16,17 @@ interface ControlPanelHandlers {
   onToggleGrid: () => void
   onToggleAxes: () => void
   onToggleAutoRotate: () => void
+  onBackgroundColorChange: (color: string) => void
   onLightAzimuthChange: (value: number) => void
   onLightElevationChange: (value: number) => void
   onLightDistanceChange: (value: number) => void
+  onToggleDirectionalLight: () => void
+  onDirectionalLightColorChange: (color: string) => void
+  onDirectionalLightIntensityChange: (value: number) => void
   onHdriIndexChange: (index: number) => void
   onHdriRotationChange: (value: number) => void
+  onHdriIntensityChange: (value: number) => void
+  onToggleHdri: () => void
   onReset: () => void
 }
 
@@ -37,7 +43,7 @@ interface ControlPanelProps {
  */
 export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
   // フックから設定を取得
-  const { checkboxes, hdri, light } = useControlPanel(settings, handlers)
+  const { checkboxes, background, hdri, light } = useControlPanel(settings, handlers)
 
   return (
     <div className={styles.panel}>
@@ -57,9 +63,34 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
         ))}
       </div>
 
+      {/* 背景設定 */}
+      <div className={styles.section}>
+        <h3 className={styles.sectionTitle}>🎨 背景設定</h3>
+        <div className={styles.colorPicker}>
+          <label>
+            <span>{background.label}</span>
+            <input
+              type="color"
+              value={background.value}
+              onChange={(e) => background.onChange(e.target.value)}
+            />
+          </label>
+        </div>
+      </div>
+
       {/* HDRI設定 */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>🌄 環境マップ</h3>
+
+        {/* HDRI有効/無効 */}
+        <label className={styles.control}>
+          <input
+            type="checkbox"
+            checked={hdri.enabled.checked}
+            onChange={hdri.enabled.onChange}
+          />
+          <span>{hdri.enabled.label}</span>
+        </label>
 
         <div className={styles.select}>
           <label>
@@ -89,12 +120,64 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
             />
           </label>
         </div>
+
+        <div className={styles.slider}>
+          <label>
+            <span>{hdri.intensity.label}: {hdri.intensity.value.toFixed(1)}</span>
+            <input
+              type="range"
+              min={hdri.intensity.min}
+              max={hdri.intensity.max}
+              step={hdri.intensity.step}
+              value={hdri.intensity.value}
+              onChange={(e) => hdri.intensity.onChange(Number(e.target.value))}
+            />
+          </label>
+        </div>
       </div>
 
       {/* ライト設定 */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>💡 ライト設定</h3>
 
+        {/* ライト有効/無効 */}
+        <label className={styles.control}>
+          <input
+            type="checkbox"
+            checked={light.enabled.checked}
+            onChange={light.enabled.onChange}
+          />
+          <span>{light.enabled.label}</span>
+        </label>
+
+        {/* ライト色 */}
+        <div className={styles.colorPicker}>
+          <label>
+            <span>{light.color.label}</span>
+            <input
+              type="color"
+              value={light.color.value}
+              onChange={(e) => light.color.onChange(e.target.value)}
+            />
+          </label>
+        </div>
+
+        {/* ライト強度 */}
+        <div className={styles.slider}>
+          <label>
+            <span>{light.intensity.label}: {light.intensity.value.toFixed(1)}</span>
+            <input
+              type="range"
+              min={light.intensity.min}
+              max={light.intensity.max}
+              step={light.intensity.step}
+              value={light.intensity.value}
+              onChange={(e) => light.intensity.onChange(Number(e.target.value))}
+            />
+          </label>
+        </div>
+
+        {/* 方位角/仰角/距離 */}
         {[light.azimuth, light.elevation, light.distance].map((slider) => (
           <div key={slider.label} className={styles.slider}>
             <label>

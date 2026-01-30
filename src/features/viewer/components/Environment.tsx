@@ -21,9 +21,13 @@ export const Environment: FC<EnvironmentProps> = ({ settings }) => {
   // フックから計算済みの値を取得
   const {
     lightPosition,
+    lightEnabled,
+    lightColor,
     lightIntensity,
     hdriPath,
     hdriRotationRad,
+    hdriIntensity,
+    hdriEnabled,
     gridConfig,
     showGrid,
     showAxes,
@@ -36,21 +40,26 @@ export const Environment: FC<EnvironmentProps> = ({ settings }) => {
       <color attach="background" args={[backgroundColor]} />
 
       {/* HDRI環境マップ（環境光のみ） */}
-      <DreiEnvironment
-        key={hdriPath}
-        files={hdriPath}
-        background={false}
-        environmentIntensity={0.5}
-        environmentRotation={[0, hdriRotationRad, 0]}
-      />
+      {hdriEnabled && (
+        <DreiEnvironment
+          key={hdriPath}
+          files={hdriPath}
+          background={false}
+          environmentIntensity={hdriIntensity}
+          environmentRotation={[0, hdriRotationRad, 0]}
+        />
+      )}
 
       {/* ディレクショナルライト */}
-      <directionalLight
-        position={lightPosition}
-        intensity={lightIntensity}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-      />
+      {lightEnabled && (
+        <directionalLight
+          position={lightPosition}
+          color={lightColor}
+          intensity={lightIntensity}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
+        />
+      )}
 
       {/* グリッド */}
       {showGrid && (

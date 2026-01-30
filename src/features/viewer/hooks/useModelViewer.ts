@@ -41,6 +41,16 @@ interface UseModelViewerReturn {
   setHdriIndex: (index: number) => void
   /** HDRI回転変更 */
   setHdriRotation: (value: number) => void
+  /** HDRI強度変更 */
+  setHdriIntensity: (value: number) => void
+  /** HDRI有効切替 */
+  toggleHdri: () => void
+  /** ディレクショナルライト有効切替 */
+  toggleDirectionalLight: () => void
+  /** ディレクショナルライト色変更 */
+  setDirectionalLightColor: (color: string) => void
+  /** ディレクショナルライト強度変更 */
+  setDirectionalLightIntensity: (value: number) => void
   /** 設定リセット */
   resetSettings: () => void
   /** 汎用設定更新 */
@@ -102,6 +112,27 @@ export const useModelViewer = (): UseModelViewerReturn => {
     updateSetting('hdriRotation', value)
   }, [updateSetting])
 
+  const setHdriIntensity = useCallback((value: number) => {
+    updateSetting('hdriIntensity', value)
+  }, [updateSetting])
+
+  const toggleHdri = useCallback(() => {
+    setSettings(prev => ({ ...prev, hdriEnabled: !prev.hdriEnabled }))
+  }, [])
+
+  // ディレクショナルライト関連
+  const toggleDirectionalLight = useCallback(() => {
+    setSettings(prev => ({ ...prev, directionalLightEnabled: !prev.directionalLightEnabled }))
+  }, [])
+
+  const setDirectionalLightColor = useCallback((color: string) => {
+    updateSetting('directionalLightColor', color)
+  }, [updateSetting])
+
+  const setDirectionalLightIntensity = useCallback((value: number) => {
+    updateSetting('directionalLightIntensity', value)
+  }, [updateSetting])
+
   const resetSettings = useCallback(() => {
     setSettings(DEFAULT_VIEWER_SETTINGS)
   }, [])
@@ -118,6 +149,11 @@ export const useModelViewer = (): UseModelViewerReturn => {
     setLightDistance,
     setHdriIndex,
     setHdriRotation,
+    setHdriIntensity,
+    toggleHdri,
+    toggleDirectionalLight,
+    setDirectionalLightColor,
+    setDirectionalLightIntensity,
     resetSettings,
     updateSetting,
   }

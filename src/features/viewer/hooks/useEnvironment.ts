@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react'
 import type { ViewerSettings } from '../types'
-import { DEFAULT_LIGHTING_SETTINGS, GRID_CONFIG, HDRI_LIST } from '../constants'
+import { GRID_CONFIG, HDRI_LIST } from '../constants'
 
 /**
  * 球面座標からデカルト座標に変換
@@ -36,12 +36,20 @@ const sphericalToCartesian = (
 interface UseEnvironmentReturn {
   /** ライト位置 [x, y, z] */
   lightPosition: [number, number, number]
+  /** ライト有効 */
+  lightEnabled: boolean
+  /** ライト色 */
+  lightColor: string
   /** ライト強度 */
   lightIntensity: number
   /** HDRIファイルパス */
   hdriPath: string
   /** HDRI回転（ラジアン） */
   hdriRotationRad: number
+  /** HDRI強度 */
+  hdriIntensity: number
+  /** HDRI有効 */
+  hdriEnabled: boolean
   /** グリッド設定 */
   gridConfig: typeof GRID_CONFIG
   /** グリッド表示フラグ */
@@ -65,8 +73,13 @@ export const useEnvironment = (settings: ViewerSettings): UseEnvironmentReturn =
     lightAzimuth,
     lightElevation,
     lightDistance,
+    directionalLightEnabled,
+    directionalLightColor,
+    directionalLightIntensity,
     hdriIndex,
     hdriRotation,
+    hdriIntensity,
+    hdriEnabled,
   } = settings
 
   // ライト位置を計算（メモ化）
@@ -89,9 +102,13 @@ export const useEnvironment = (settings: ViewerSettings): UseEnvironmentReturn =
 
   return {
     lightPosition,
-    lightIntensity: DEFAULT_LIGHTING_SETTINGS.directionalIntensity,
+    lightEnabled: directionalLightEnabled,
+    lightColor: directionalLightColor,
+    lightIntensity: directionalLightIntensity,
     hdriPath,
     hdriRotationRad,
+    hdriIntensity,
+    hdriEnabled,
     gridConfig: GRID_CONFIG,
     showGrid,
     showAxes,

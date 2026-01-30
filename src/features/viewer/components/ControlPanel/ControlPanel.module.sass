@@ -127,6 +127,36 @@
         border-radius: 50%
         cursor: pointer
 
+// カラーピッカー
+.colorPicker
+  margin-bottom: v.$spacing-sm
+
+  label
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: v.$spacing-sm
+
+    span
+      font-size: 11px
+      color: rgba(255, 255, 255, 0.6)
+
+    input[type="color"]
+      width: 36px
+      height: 24px
+      padding: 0
+      border: 1px solid rgba(255, 255, 255, 0.2)
+      border-radius: 4px
+      cursor: pointer
+      background: transparent
+
+      &::-webkit-color-swatch-wrapper
+        padding: 2px
+
+      &::-webkit-color-swatch
+        border-radius: 2px
+        border: none
+
 // リセットボタン
 .resetButton
   margin-top: v.$spacing-md

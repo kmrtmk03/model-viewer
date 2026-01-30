@@ -26,8 +26,13 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
   lightAzimuth: 45,
   lightElevation: 60,
   lightDistance: 12,
+  directionalLightEnabled: true,
+  directionalLightColor: '#ffffff',
+  directionalLightIntensity: 1.0,
   hdriIndex: 0,
   hdriRotation: 0,
+  hdriIntensity: 0.5,
+  hdriEnabled: true,
 }
 
 /**
