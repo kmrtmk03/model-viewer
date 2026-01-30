@@ -61,6 +61,8 @@ export interface ViewerSettings {
   hdriIntensity: number
   /** HDRI有効フラグ */
   hdriEnabled: boolean
+  /** 背景モード */
+  backgroundMode: 'color' | 'hdri'
 }
 
 /**

@@ -35,6 +35,7 @@ export const ModelViewer: FC = () => {
     setHdriRotation,
     setHdriIntensity,
     toggleHdri,
+    setBackgroundMode,
     resetSettings,
   } = useModelViewer()
 
@@ -59,6 +60,7 @@ export const ModelViewer: FC = () => {
     onToggleAxes: toggleAxes,
     onToggleAutoRotate: toggleAutoRotate,
     onBackgroundColorChange: setBackgroundColor,
+    onBackgroundModeChange: setBackgroundMode,
     onLightAzimuthChange: setLightAzimuth,
     onLightElevationChange: setLightElevation,
     onLightDistanceChange: setLightDistance,

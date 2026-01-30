@@ -33,6 +33,7 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
   hdriRotation: 0,
   hdriIntensity: 0.5,
   hdriEnabled: true,
+  backgroundMode: 'color',
 }
 
 /**

@@ -58,6 +58,8 @@ interface UseEnvironmentReturn {
   showAxes: boolean
   /** 背景色 */
   backgroundColor: string
+  /** 背景モード */
+  backgroundMode: 'color' | 'hdri'
 }
 
 /**
@@ -80,6 +82,7 @@ export const useEnvironment = (settings: ViewerSettings): UseEnvironmentReturn =
     hdriRotation,
     hdriIntensity,
     hdriEnabled,
+    backgroundMode,
   } = settings
 
   // ライト位置を計算（メモ化）
@@ -109,6 +112,7 @@ export const useEnvironment = (settings: ViewerSettings): UseEnvironmentReturn =
     hdriRotationRad,
     hdriIntensity,
     hdriEnabled,
+    backgroundMode,
     gridConfig: GRID_CONFIG,
     showGrid,
     showAxes,

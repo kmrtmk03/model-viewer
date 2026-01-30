@@ -3,5 +3,5 @@
  */
 export { useModelViewer } from './useModelViewer'
 export { useEnvironment } from './useEnvironment'
-export { useControlPanel } from './useControlPanel'
+export { useControlPanel, type ControlPanelHandlers } from './useControlPanel'
 export { useModelLoader } from './useModelLoader'

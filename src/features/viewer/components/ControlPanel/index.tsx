@@ -5,30 +5,10 @@
 
 import type { FC } from 'react'
 import type { ViewerSettings } from '../../types'
-import { useControlPanel } from '../../hooks'
+import { useControlPanel, type ControlPanelHandlers } from '../../hooks'
 import styles from './ControlPanel.module.sass'
 
-/**
- * ハンドラー関数の型
- */
-interface ControlPanelHandlers {
-  onToggleWireframe: () => void
-  onToggleGrid: () => void
-  onToggleAxes: () => void
-  onToggleAutoRotate: () => void
-  onBackgroundColorChange: (color: string) => void
-  onLightAzimuthChange: (value: number) => void
-  onLightElevationChange: (value: number) => void
-  onLightDistanceChange: (value: number) => void
-  onToggleDirectionalLight: () => void
-  onDirectionalLightColorChange: (color: string) => void
-  onDirectionalLightIntensityChange: (value: number) => void
-  onHdriIndexChange: (index: number) => void
-  onHdriRotationChange: (value: number) => void
-  onHdriIntensityChange: (value: number) => void
-  onToggleHdri: () => void
-  onReset: () => void
-}
+// ローカルのControlPanelHandlers定義を削除
 
 interface ControlPanelProps {
   /** ビューアー設定 */
@@ -66,16 +46,39 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 背景設定 */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>🎨 背景設定</h3>
-        <div className={styles.colorPicker}>
-          <label>
-            <span>{background.label}</span>
-            <input
-              type="color"
-              value={background.value}
-              onChange={(e) => background.onChange(e.target.value)}
-            />
-          </label>
+
+        {/* モード選択 */}
+        <div className={styles.radioGroup}>
+          <span className={styles.label}>{background.mode.label}:</span>
+          <div className={styles.options}>
+            {background.mode.options.map((option) => (
+              <label key={option.value} className={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="backgroundMode"
+                  value={option.value}
+                  checked={background.mode.value === option.value}
+                  onChange={() => background.mode.onChange(option.value)}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
         </div>
+
+        {/* 背景色（Colorモード時のみ） */}
+        {background.mode.value === 'color' && (
+          <div className={styles.colorPicker}>
+            <label>
+              <span>{background.color.label}</span>
+              <input
+                type="color"
+                value={background.color.value as string}
+                onChange={(e) => background.color.onChange(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
       </div>
 
       {/* HDRI設定 */}

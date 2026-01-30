@@ -34,9 +34,9 @@ interface SliderConfig {
  */
 interface SelectConfig {
   label: string
-  value: number
-  options: { value: number; label: string }[]
-  onChange: (value: number) => void
+  value: number | string
+  options: { value: number | string; label: string }[]
+  onChange: (value: any) => void
 }
 
 /**
@@ -55,7 +55,10 @@ interface UseControlPanelReturn {
   /** チェックボックス設定 */
   checkboxes: CheckboxConfig[]
   /** 背景色設定 */
-  background: ColorConfig
+  background: {
+    mode: SelectConfig
+    color: ColorConfig
+  }
   /** HDRI設定 */
   hdri: {
     enabled: CheckboxConfig
@@ -77,12 +80,13 @@ interface UseControlPanelReturn {
 /**
  * ハンドラー関数の型
  */
-interface ControlPanelHandlers {
+export interface ControlPanelHandlers {
   onToggleWireframe: () => void
   onToggleGrid: () => void
   onToggleAxes: () => void
   onToggleAutoRotate: () => void
   onBackgroundColorChange: (color: string) => void
+  onBackgroundModeChange: (mode: 'color' | 'hdri') => void
   onLightAzimuthChange: (value: number) => void
   onLightElevationChange: (value: number) => void
   onLightDistanceChange: (value: number) => void
@@ -93,6 +97,7 @@ interface ControlPanelHandlers {
   onHdriRotationChange: (value: number) => void
   onHdriIntensityChange: (value: number) => void
   onToggleHdri: () => void
+  onReset: () => void
 }
 
 /**
@@ -132,11 +137,22 @@ export const useControlPanel = (
   ], [wireframe, showGrid, showAxes, autoRotate, handlers])
 
   // 背景色設定
-  const background = useMemo<ColorConfig>(() => ({
-    label: '背景色',
-    value: backgroundColor,
-    onChange: handlers.onBackgroundColorChange,
-  }), [backgroundColor, handlers])
+  const background = useMemo(() => ({
+    mode: {
+      label: '背景モード',
+      value: settings.backgroundMode,
+      options: [
+        { label: '単色', value: 'color' },
+        { label: 'HDRI', value: 'hdri' },
+      ],
+      onChange: handlers.onBackgroundModeChange,
+    },
+    color: {
+      label: '背景色',
+      value: backgroundColor,
+      onChange: handlers.onBackgroundColorChange,
+    },
+  }), [settings.backgroundMode, backgroundColor, handlers])
 
   // HDRI選択オプション
   const hdriOptions = useMemo(() =>

@@ -4,6 +4,9 @@
  */
 
 import type { FC } from 'react'
+import { useEffect } from 'react'
+import { useThree } from '@react-three/fiber'
+import { Color } from 'three'
 import { Grid, GizmoHelper, GizmoViewport, Environment as DreiEnvironment } from '@react-three/drei'
 import type { ViewerSettings } from '../types'
 import { useEnvironment } from '../hooks'
@@ -18,6 +21,7 @@ interface EnvironmentProps {
  * ロジックはuseEnvironmentフックで処理
  */
 export const Environment: FC<EnvironmentProps> = ({ settings }) => {
+  const { scene } = useThree()
   // フックから計算済みの値を取得
   const {
     lightPosition,
@@ -32,19 +36,26 @@ export const Environment: FC<EnvironmentProps> = ({ settings }) => {
     showGrid,
     showAxes,
     backgroundColor,
+    backgroundMode,
   } = useEnvironment(settings)
+
+  // 背景色設定（Colorモード時）
+  // <color attach="background" /> はDreiEnvironmentとの競合で
+  // 意図した挙動にならない場合があるため、明示的に制御する
+  useEffect(() => {
+    if (backgroundMode === 'color') {
+      scene.background = new Color(backgroundColor)
+    }
+  }, [backgroundMode, backgroundColor, scene])
 
   return (
     <>
-      {/* 背景色 */}
-      <color attach="background" args={[backgroundColor]} />
-
-      {/* HDRI環境マップ（環境光のみ） */}
+      {/* HDRI環境マップ */}
       {hdriEnabled && (
         <DreiEnvironment
           key={hdriPath}
           files={hdriPath}
-          background={false}
+          background={backgroundMode === 'hdri'}
           environmentIntensity={hdriIntensity}
           environmentRotation={[0, hdriRotationRad, 0]}
         />

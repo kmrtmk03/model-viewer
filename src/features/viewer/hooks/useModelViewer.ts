@@ -45,6 +45,8 @@ interface UseModelViewerReturn {
   setHdriIntensity: (value: number) => void
   /** HDRI有効切替 */
   toggleHdri: () => void
+  /** 背景モード変更 */
+  setBackgroundMode: (mode: 'color' | 'hdri') => void
   /** ディレクショナルライト有効切替 */
   toggleDirectionalLight: () => void
   /** ディレクショナルライト色変更 */
@@ -137,6 +139,10 @@ export const useModelViewer = (): UseModelViewerReturn => {
     setSettings(DEFAULT_VIEWER_SETTINGS)
   }, [])
 
+  const setBackgroundMode = useCallback((mode: 'color' | 'hdri') => {
+    updateSetting('backgroundMode', mode)
+  }, [updateSetting])
+
   return {
     settings,
     toggleWireframe,
@@ -144,6 +150,7 @@ export const useModelViewer = (): UseModelViewerReturn => {
     toggleAxes,
     toggleAutoRotate,
     setBackgroundColor,
+    setBackgroundMode,
     setLightAzimuth,
     setLightElevation,
     setLightDistance,

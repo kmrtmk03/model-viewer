@@ -127,9 +127,59 @@
         border-radius: 50%
         cursor: pointer
 
+// ラジオボタングループ
+.radioGroup
+  margin-bottom: v.$spacing-sm
+
+  .label
+    display: block
+    font-size: 11px
+    color: rgba(255, 255, 255, 0.6)
+    margin-bottom: 6px
+
+  .options
+    display: flex
+    gap: v.$spacing-md
+
+// ラジオボタンラベル
+.radioLabel
+  display: flex
+  align-items: center
+  gap: 6px
+  cursor: pointer
+
+  span
+    font-size: 12px
+    color: rgba(255, 255, 255, 0.8)
+
+  input[type="radio"]
+    appearance: none
+    width: 16px
+    height: 16px
+    border: 1px solid rgba(255, 255, 255, 0.3)
+    border-radius: 50%
+    position: relative
+    cursor: pointer
+
+    &:checked
+      border-color: #6366f1
+
+      &::after
+        content: ""
+        position: absolute
+        top: 50%
+        left: 50%
+        transform: translate(-50%, -50%)
+        width: 8px
+        height: 8px
+        background: #6366f1
+        border-radius: 50%
+
 // カラーピッカー
 .colorPicker
   margin-bottom: v.$spacing-sm
+  margin-top: v.$spacing-sm
+  padding-left: v.$spacing-xs
 
   label
     display: flex
