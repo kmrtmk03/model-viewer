@@ -1,6 +1,6 @@
 /**
  * 3Dモデルコンポーネント
- * @description サンプル3Dオブジェクトを表示（ビュー専念）
+ * @description 外部モデルまたはサンプル3Dオブジェクトを表示（ビュー専念）
  */
 
 import { useRef, type FC } from 'react'
@@ -11,13 +11,14 @@ import type { ViewerSettings } from '../types'
 interface ModelProps {
   /** ビューアー設定 */
   settings: ViewerSettings
+  /** 外部から読み込まれた3Dモデル */
+  externalModel?: Group | null
 }
 
 /**
- * サンプル3Dモデルコンポーネント（ビュー専念）
+ * サンプル3Dモデル（フォールバック用）
  */
-export const Model: FC<ModelProps> = ({ settings }) => {
-  const { wireframe, autoRotate } = settings
+const SampleModel: FC<{ wireframe: boolean; autoRotate: boolean }> = ({ wireframe, autoRotate }) => {
   const groupRef = useRef<Group>(null)
   const torusRef = useRef<Mesh>(null)
 
@@ -65,4 +66,38 @@ export const Model: FC<ModelProps> = ({ settings }) => {
       </mesh>
     </group>
   )
+}
+
+/**
+ * 外部モデル表示コンポーネント
+ */
+const ExternalModel: FC<{ model: Group; autoRotate: boolean }> = ({ model, autoRotate }) => {
+  const groupRef = useRef<Group>(null)
+
+  // 自動回転
+  useFrame((_, delta) => {
+    if (autoRotate && groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.5
+    }
+  })
+
+  return (
+    <group ref={groupRef}>
+      <primitive object={model} />
+    </group>
+  )
+}
+
+/**
+ * 3Dモデルコンポーネント（ビュー専念）
+ */
+export const Model: FC<ModelProps> = ({ settings, externalModel }) => {
+  const { wireframe, autoRotate } = settings
+
+  // 外部モデルがあれば表示、なければサンプルモデル
+  if (externalModel) {
+    return <ExternalModel model={externalModel} autoRotate={autoRotate} />
+  }
+
+  return <SampleModel wireframe={wireframe} autoRotate={autoRotate} />
 }

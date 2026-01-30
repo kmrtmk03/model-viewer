@@ -6,7 +6,7 @@
 import type { FC } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { useModelViewer } from '../../hooks'
+import { useModelViewer, useModelLoader } from '../../hooks'
 import { DEFAULT_CAMERA_SETTINGS } from '../../constants'
 import { Environment } from '../Environment'
 import { Model } from '../Model'
@@ -38,6 +38,20 @@ export const ModelViewer: FC = () => {
     resetSettings,
   } = useModelViewer()
 
+  // モデルローダーフック
+  const {
+    loadedModel,
+    modelObject,
+    isLoading,
+    error,
+    isDragging,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    clearModel,
+  } = useModelLoader()
+
   // ControlPanel用ハンドラーをまとめる
   const handlers = {
     onToggleWireframe: toggleWireframe,
@@ -59,7 +73,13 @@ export const ModelViewer: FC = () => {
   }
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* 3Dキャンバス */}
       <Canvas
         className={styles.canvas}
@@ -75,7 +95,7 @@ export const ModelViewer: FC = () => {
         <Environment settings={settings} />
 
         {/* 3Dモデル */}
-        <Model settings={settings} />
+        <Model settings={settings} externalModel={modelObject} />
 
         {/* カメラコントロール */}
         <OrbitControls
@@ -88,12 +108,47 @@ export const ModelViewer: FC = () => {
         />
       </Canvas>
 
+      {/* ドラッグオーバーレイ */}
+      {isDragging && (
+        <div className={styles.dropOverlay}>
+          <div className={styles.dropContent}>
+            <span className={styles.dropIcon}>📁</span>
+            <span>FBX / GLB ファイルをドロップ</span>
+          </div>
+        </div>
+      )}
+
+      {/* ローディング表示 */}
+      {isLoading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingContent}>
+            <span className={styles.loadingSpinner}>⏳</span>
+            <span>モデルを読み込み中...</span>
+          </div>
+        </div>
+      )}
+
+      {/* エラー表示 */}
+      {error && (
+        <div className={styles.errorMessage}>
+          <span>❌ {error}</span>
+        </div>
+      )}
+
+      {/* 読み込み済みモデル情報 */}
+      {loadedModel && (
+        <div className={styles.modelInfo}>
+          <span>📦 {loadedModel.name}</span>
+          <button onClick={clearModel} className={styles.clearButton}>✕</button>
+        </div>
+      )}
+
       {/* コントロールパネル */}
       <ControlPanel settings={settings} handlers={handlers} />
 
       {/* 操作ヒント */}
       <div className={styles.hint}>
-        🖱️ 左ドラッグ: 回転 / 右ドラッグ: パン / スクロール: ズーム
+        🖱️ 左ドラッグ: 回転 / 右ドラッグ: パン / スクロール: ズーム / ファイルドロップ: モデル読み込み
       </div>
     </div>
   )

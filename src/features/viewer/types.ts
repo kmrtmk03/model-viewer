@@ -88,3 +88,15 @@ export interface LightingSettings {
   /** ディレクショナルライトの位置 */
   directionalPosition: [number, number, number]
 }
+
+/**
+ * 読み込まれたモデルの情報
+ */
+export interface LoadedModel {
+  /** オブジェクトURL */
+  url: string
+  /** モデルタイプ */
+  type: 'fbx' | 'gltf'
+  /** ファイル名 */
+  name: string
+}
