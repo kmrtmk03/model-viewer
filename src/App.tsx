@@ -1,7 +1,7 @@
 import './App.sass'
 import type { ReactElement } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { ModelViewer } from '@/components/viewer/ModelViewer'
+import { ModelViewer } from '@/features/viewer'
 
 function App(): ReactElement {
   return (

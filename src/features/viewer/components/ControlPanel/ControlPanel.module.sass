@@ -1,0 +1,146 @@
+/**
+ * コントロールパネルのスタイル
+ */
+
+// パネル本体
+.panel
+  position: absolute
+  top: v.$spacing-md
+  left: v.$spacing-md
+  padding: v.$spacing-md
+  background: rgba(26, 26, 46, 0.9)
+  border-radius: 12px
+  border: 1px solid rgba(255, 255, 255, 0.1)
+  backdrop-filter: blur(10px)
+  min-width: 220px
+  max-height: 90vh
+  overflow-y: auto
+  z-index: 100
+
+// タイトル
+.title
+  margin: 0 0 v.$spacing-md 0
+  font-size: 14px
+  font-weight: 600
+  color: rgba(255, 255, 255, 0.9)
+  letter-spacing: 0.5px
+
+// コントロール群
+.controls
+  display: flex
+  flex-direction: column
+  gap: v.$spacing-sm
+
+// 各コントロール
+.control
+  display: flex
+  align-items: center
+  gap: v.$spacing-sm
+  cursor: pointer
+  color: rgba(255, 255, 255, 0.8)
+  font-size: 13px
+  transition: color 0.2s ease
+
+  &:hover
+    color: #6366f1
+
+  input[type="checkbox"]
+    width: 16px
+    height: 16px
+    accent-color: #6366f1
+    cursor: pointer
+
+// セクション
+.section
+  margin-top: v.$spacing-md
+  padding-top: v.$spacing-md
+  border-top: 1px solid rgba(255, 255, 255, 0.1)
+
+// セクションタイトル
+.sectionTitle
+  margin: 0 0 v.$spacing-sm 0
+  font-size: 12px
+  font-weight: 500
+  color: rgba(255, 255, 255, 0.7)
+
+// セレクトボックス
+.select
+  margin-bottom: v.$spacing-sm
+
+  label
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    span
+      font-size: 11px
+      color: rgba(255, 255, 255, 0.6)
+
+    select
+      width: 100%
+      padding: 6px 8px
+      background: rgba(255, 255, 255, 0.1)
+      border: 1px solid rgba(255, 255, 255, 0.2)
+      border-radius: 6px
+      color: rgba(255, 255, 255, 0.9)
+      font-size: 12px
+      cursor: pointer
+      outline: none
+      transition: border-color 0.2s ease
+
+      &:hover
+        border-color: #6366f1
+
+      &:focus
+        border-color: #6366f1
+
+      option
+        background: #1a1a2e
+        color: rgba(255, 255, 255, 0.9)
+
+// スライダー
+.slider
+  margin-bottom: v.$spacing-sm
+
+  label
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    span
+      font-size: 11px
+      color: rgba(255, 255, 255, 0.6)
+
+    input[type="range"]
+      width: 100%
+      height: 4px
+      accent-color: #6366f1
+      cursor: pointer
+      background: rgba(255, 255, 255, 0.1)
+      border-radius: 2px
+
+      &::-webkit-slider-thumb
+        -webkit-appearance: none
+        width: 12px
+        height: 12px
+        background: #6366f1
+        border-radius: 50%
+        cursor: pointer
+
+// リセットボタン
+.resetButton
+  margin-top: v.$spacing-md
+  padding: v.$spacing-sm v.$spacing-md
+  width: 100%
+  background: transparent
+  border: 1px solid rgba(255, 255, 255, 0.2)
+  border-radius: 8px
+  color: rgba(255, 255, 255, 0.7)
+  font-size: 12px
+  cursor: pointer
+  transition: all 0.2s ease
+
+  &:hover
+    background: rgba(255, 255, 255, 0.1)
+    border-color: #6366f1
+    color: #6366f1
