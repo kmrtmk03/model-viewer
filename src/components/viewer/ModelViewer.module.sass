@@ -1,0 +1,30 @@
+/**
+ * モデルビューアーのスタイル
+ */
+
+// ビューアーコンテナ
+.container
+  position: relative
+  width: 100vw
+  height: 100vh
+  overflow: hidden
+
+// キャンバス
+.canvas
+  width: 100%
+  height: 100%
+
+// 操作ヒント
+.hint
+  position: absolute
+  bottom: v.$spacing-md
+  left: 50%
+  transform: translateX(-50%)
+  padding: v.$spacing-xs v.$spacing-md
+  background: rgba(26, 26, 46, 0.8)
+  border-radius: 20px
+  border: 1px solid rgba(255, 255, 255, 0.1)
+  color: rgba(255, 255, 255, 0.6)
+  font-size: 12px
+  pointer-events: none
+  user-select: none
