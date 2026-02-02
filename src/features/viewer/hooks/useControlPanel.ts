@@ -18,7 +18,7 @@
 
 import { useMemo } from 'react'
 import type { ViewerSettings, PostEffectSettings } from '../types'
-import { HDRI_LIST, POST_EFFECT_SLIDER_RANGES } from '../constants'
+import { HDRI_LIST, POST_EFFECT_SLIDER_RANGES, GLITCH_SLIDER_RANGES } from '../constants'
 
 // ==========================================
 // UI設定の型定義
@@ -426,44 +426,48 @@ export const useControlPanel = (
         onChange: (v) => handlers.onUpdatePostEffectSetting('dotScreenScale', v),
       },
       // Glitch（グリッチ効果）
+      // タプル型パラメータのスライダー
+      // 発生間隔（delay）
       {
         label: 'Glitch遅延(min)',
         value: postEffects.glitchDelay[0],
-        ...POST_EFFECT_SLIDER_RANGES.glitchDelayMin,
+        ...GLITCH_SLIDER_RANGES.delay.min,
         unit: 's',
         onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDelay', [v, postEffects.glitchDelay[1]]),
       },
       {
         label: 'Glitch遅延(max)',
         value: postEffects.glitchDelay[1],
-        ...POST_EFFECT_SLIDER_RANGES.glitchDelayMax,
+        ...GLITCH_SLIDER_RANGES.delay.max,
         unit: 's',
         onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDelay', [postEffects.glitchDelay[0], v]),
       },
+      // 持続時間（duration）
       {
         label: 'Glitch時間(min)',
         value: postEffects.glitchDuration[0],
-        ...POST_EFFECT_SLIDER_RANGES.glitchDurationMin,
+        ...GLITCH_SLIDER_RANGES.duration.min,
         unit: 's',
         onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDuration', [v, postEffects.glitchDuration[1]]),
       },
       {
         label: 'Glitch時間(max)',
         value: postEffects.glitchDuration[1],
-        ...POST_EFFECT_SLIDER_RANGES.glitchDurationMax,
+        ...GLITCH_SLIDER_RANGES.duration.max,
         unit: 's',
         onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDuration', [postEffects.glitchDuration[0], v]),
       },
+      // 強度（strength）
       {
         label: 'Glitch強度(弱)',
         value: postEffects.glitchStrength[0],
-        ...POST_EFFECT_SLIDER_RANGES.glitchStrengthWeak,
+        ...GLITCH_SLIDER_RANGES.strength.weak,
         onChange: (v) => handlers.onUpdatePostEffectSetting('glitchStrength', [v, postEffects.glitchStrength[1]]),
       },
       {
         label: 'Glitch強度(強)',
         value: postEffects.glitchStrength[1],
-        ...POST_EFFECT_SLIDER_RANGES.glitchStrengthStrong,
+        ...GLITCH_SLIDER_RANGES.strength.strong,
         onChange: (v) => handlers.onUpdatePostEffectSetting('glitchStrength', [postEffects.glitchStrength[0], v]),
       },
     ],

@@ -51,14 +51,32 @@ export const POST_EFFECT_SLIDER_RANGES = {
   pixelationGranularity: { min: 1, max: 20, step: 1 },
   // DotScreen
   dotScreenScale: { min: 0.5, max: 3, step: 0.1 },
-  // Glitch
-  glitchDelayMin: { min: 0.1, max: 5, step: 0.1 },
-  glitchDelayMax: { min: 0.5, max: 10, step: 0.1 },
-  glitchDurationMin: { min: 0.1, max: 2, step: 0.1 },
-  glitchDurationMax: { min: 0.2, max: 3, step: 0.1 },
-  glitchStrengthWeak: { min: 0, max: 1, step: 0.1 },
-  glitchStrengthStrong: { min: 0.1, max: 2, step: 0.1 },
 } as const satisfies Record<string, SliderRange>
+
+/**
+ * グリッチエフェクトのスライダー範囲
+ * @description タプル型パラメータ（delay/duration/strength）の設定範囲
+ * 
+ * 各パラメータは [min, max] のタプルで管理されるため、
+ * 専用のオブジェクト構造で範囲を定義する。
+ */
+export const GLITCH_SLIDER_RANGES = {
+  /** 発生間隔（秒）: 次のグリッチまでの待機時間 */
+  delay: {
+    min: { min: 0.1, max: 5, step: 0.1 },
+    max: { min: 0.5, max: 10, step: 0.1 },
+  },
+  /** 持続時間（秒）: グリッチが継続する時間 */
+  duration: {
+    min: { min: 0.1, max: 2, step: 0.1 },
+    max: { min: 0.2, max: 3, step: 0.1 },
+  },
+  /** 強度: 弱いグリッチと強いグリッチの強さ */
+  strength: {
+    weak: { min: 0, max: 1, step: 0.1 },
+    strong: { min: 0.1, max: 2, step: 0.1 },
+  },
+} as const
 
 /**
  * デフォルトのポストエフェクト設定

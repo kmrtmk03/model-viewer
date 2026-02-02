@@ -15,6 +15,7 @@
  * - ColorAverage: モノクロ化
  * - Pixelation: ピクセル化（レトロ風）
  * - DotScreen: 網点効果（ハーフトーン）
+ * - Glitch: デジタルグリッチ（ノイズ・歪み・色収差）
  * 
  * @example
  * ```tsx
