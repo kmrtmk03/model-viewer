@@ -425,6 +425,47 @@ export const useControlPanel = (
         ...POST_EFFECT_SLIDER_RANGES.dotScreenScale,
         onChange: (v) => handlers.onUpdatePostEffectSetting('dotScreenScale', v),
       },
+      // Glitch（グリッチ効果）
+      {
+        label: 'Glitch遅延(min)',
+        value: postEffects.glitchDelay[0],
+        ...POST_EFFECT_SLIDER_RANGES.glitchDelayMin,
+        unit: 's',
+        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDelay', [v, postEffects.glitchDelay[1]]),
+      },
+      {
+        label: 'Glitch遅延(max)',
+        value: postEffects.glitchDelay[1],
+        ...POST_EFFECT_SLIDER_RANGES.glitchDelayMax,
+        unit: 's',
+        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDelay', [postEffects.glitchDelay[0], v]),
+      },
+      {
+        label: 'Glitch時間(min)',
+        value: postEffects.glitchDuration[0],
+        ...POST_EFFECT_SLIDER_RANGES.glitchDurationMin,
+        unit: 's',
+        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDuration', [v, postEffects.glitchDuration[1]]),
+      },
+      {
+        label: 'Glitch時間(max)',
+        value: postEffects.glitchDuration[1],
+        ...POST_EFFECT_SLIDER_RANGES.glitchDurationMax,
+        unit: 's',
+        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDuration', [postEffects.glitchDuration[0], v]),
+      },
+      {
+        label: 'Glitch強度(弱)',
+        value: postEffects.glitchStrength[0],
+        ...POST_EFFECT_SLIDER_RANGES.glitchStrengthWeak,
+        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchStrength', [v, postEffects.glitchStrength[1]]),
+      },
+      {
+        label: 'Glitch強度(強)',
+        value: postEffects.glitchStrength[1],
+        ...POST_EFFECT_SLIDER_RANGES.glitchStrengthStrong,
+        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchStrength', [postEffects.glitchStrength[0], v]),
+      },
     ],
   }), [postEffects, handlers])
 
