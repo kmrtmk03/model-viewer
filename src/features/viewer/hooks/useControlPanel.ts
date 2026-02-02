@@ -348,6 +348,7 @@ export const useControlPanel = (
       { label: 'ColorAverage', checked: postEffects.colorAverageEnabled, onChange: () => handlers.onTogglePostEffect('colorAverageEnabled') },
       { label: 'Pixelation', checked: postEffects.pixelationEnabled, onChange: () => handlers.onTogglePostEffect('pixelationEnabled') },
       { label: 'DotScreen', checked: postEffects.dotScreenEnabled, onChange: () => handlers.onTogglePostEffect('dotScreenEnabled') },
+      { label: 'Glitch', checked: postEffects.glitchEnabled, onChange: () => handlers.onTogglePostEffect('glitchEnabled') },
     ],
     // エフェクトパラメータのスライダー
     // POST_EFFECT_SLIDER_RANGESからmin/max/step値を取得

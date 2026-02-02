@@ -311,6 +311,38 @@ export interface PostEffectSettings {
    * @range 0.5 - 3
    */
   dotScreenScale: number
+
+  // ==========================================
+  // Glitch（グリッチ効果）
+  // デジタルノイズ風の歪み・色収差エフェクト
+  // ==========================================
+
+  /** 
+   * Glitch有効フラグ
+   * @default false
+   */
+  glitchEnabled: boolean
+
+  /** 
+   * グリッチ発生間隔 [最小, 最大]（秒）
+   * グリッチが発生するまでの待機時間の範囲
+   * @default [1.5, 3.5]
+   */
+  glitchDelay: [number, number]
+
+  /** 
+   * グリッチ持続時間 [最小, 最大]（秒）
+   * グリッチが継続する時間の範囲
+   * @default [0.6, 1.0]
+   */
+  glitchDuration: [number, number]
+
+  /** 
+   * グリッチ強度 [弱, 強]
+   * 弱いグリッチと強いグリッチの強度
+   * @default [0.3, 1.0]
+   */
+  glitchStrength: [number, number]
 }
 
 

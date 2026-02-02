@@ -38,8 +38,10 @@ import {
   ColorAverage,
   Pixelation,
   DotScreen,
+  Glitch,
 } from '@react-three/postprocessing'
-import { ToneMappingMode, BlendFunction } from 'postprocessing'
+import { ToneMappingMode, BlendFunction, GlitchMode } from 'postprocessing'
+import { Vector2 } from 'three'
 import type { PostEffectSettings } from '../types'
 
 /**
@@ -124,6 +126,14 @@ export const PostEffects: FC<PostEffectsProps> = ({ settings }) => {
     // ==========================================
     dotScreenEnabled,
     dotScreenScale,
+
+    // ==========================================
+    // Glitch（グリッチ効果）
+    // ==========================================
+    glitchEnabled,
+    glitchDelay,
+    glitchDuration,
+    glitchStrength,
   } = settings
 
   /**
@@ -242,6 +252,25 @@ export const PostEffects: FC<PostEffectsProps> = ({ settings }) => {
       effectList.push(<DotScreen key="dotScreen" scale={dotScreenScale} />)
     }
 
+    // ------------------------------------------
+    // Glitch グリッチ効果
+    // デジタルノイズ風の歪み・色収差エフェクト
+    // mode: SPORADIC = 散発的なグリッチ
+    // ------------------------------------------
+    if (glitchEnabled) {
+      effectList.push(
+        <Glitch
+          key="glitch"
+          delay={new Vector2(glitchDelay[0], glitchDelay[1])}
+          duration={new Vector2(glitchDuration[0], glitchDuration[1])}
+          strength={new Vector2(glitchStrength[0], glitchStrength[1])}
+          mode={GlitchMode.SPORADIC}
+          active
+          ratio={0.85}
+        />
+      )
+    }
+
     return effectList
   }, [
     // 依存配列: settingsの各プロパティを個別に指定
@@ -266,6 +295,10 @@ export const PostEffects: FC<PostEffectsProps> = ({ settings }) => {
     pixelationGranularity,
     dotScreenEnabled,
     dotScreenScale,
+    glitchEnabled,
+    glitchDelay,
+    glitchDuration,
+    glitchStrength,
   ])
 
   // ------------------------------------------

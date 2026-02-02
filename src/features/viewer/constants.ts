@@ -87,6 +87,11 @@ export const DEFAULT_POST_EFFECT_SETTINGS: PostEffectSettings = {
   // DotScreen
   dotScreenEnabled: false,
   dotScreenScale: 1.0,
+  // Glitch
+  glitchEnabled: false,
+  glitchDelay: [1.5, 3.5],
+  glitchDuration: [0.6, 1.0],
+  glitchStrength: [0.3, 1.0],
 }
 
 /**
