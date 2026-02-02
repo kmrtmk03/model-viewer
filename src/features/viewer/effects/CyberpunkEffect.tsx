@@ -1,58 +1,37 @@
 import { Effect } from 'postprocessing'
-import { Uniform } from 'three'
+import { Uniform, type WebGLRenderer, type WebGLRenderTarget } from 'three'
 import { forwardRef, useMemo } from 'react'
+import { fragmentShader } from '../shaders/cyberpunkShader'
 
-// フラグメントシェーダー: Cyberpunk Effect
-// - スキャンライン
-// - ノイズ
-// - 色収差（RGB Shift）
-const fragmentShader = `
-uniform float time;
-uniform float scanlineDensity;
-uniform float scanlineStrength;
-uniform float noiseStrength;
-uniform float rgbShiftStrength;
-
-// 乱数生成
-float rand(vec2 co) {
-  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+/**
+ * CyberpunkEffectのプロパティ定義
+ */
+interface CyberpunkEffectProps {
+  /** スキャンラインの密度 @default 1.0 */
+  scanlineDensity?: number
+  /** スキャンラインの強度 @default 0.3 */
+  scanlineStrength?: number
+  /** ノイズの強度 @default 0.1 */
+  noiseStrength?: number
+  /** RGBシフト（色収差）の強度 @default 0.5 */
+  rgbShiftStrength?: number
 }
 
-void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-  // RGB Shift
-  float r = texture2D(inputBuffer, uv + vec2(rgbShiftStrength * 0.005, 0.0)).r;
-  float g = texture2D(inputBuffer, uv).g;
-  float b = texture2D(inputBuffer, uv - vec2(rgbShiftStrength * 0.005, 0.0)).b;
-  vec3 color = vec3(r, g, b);
-
-  // Scanlines
-  float scanline = sin(uv.y * scanlineDensity * 100.0 + time * 5.0) * 0.5 + 0.5;
-  color -= scanline * scanlineStrength;
-
-  // Noise
-  float noise = rand(uv + time) * noiseStrength;
-  color += noise;
-
-  // Vignette-like darkening at edges for CRT feel
-  float dist = distance(uv, vec2(0.5));
-  color *= 1.0 - dist * 0.5;
-
-  outputColor = vec4(color, inputColor.a);
-}
-`
-
-interface CyberpunkEffectImpl extends Effect {
-  constructor: new (options?: any) => any
-}
-
-// Effectクラスの実装
+/**
+ * CyberpunkEffectの実装クラス
+ * @description postprocessingのEffectクラスを継承したカスタムエフェクト
+ */
 class CyberpunkEffectImpl extends Effect {
+  /**
+   * コンストラクタ
+   * @param options エフェクトの設定オプション
+   */
   constructor({
     scanlineDensity = 1.0,
     scanlineStrength = 0.3,
     noiseStrength = 0.1,
     rgbShiftStrength = 0.5,
-  } = {}) {
+  }: CyberpunkEffectProps = {}) {
     super('CyberpunkEffect', fragmentShader, {
       uniforms: new Map([
         ['time', new Uniform(0.0)],
@@ -64,7 +43,14 @@ class CyberpunkEffectImpl extends Effect {
     })
   }
 
-  update(_renderer: any, _inputBuffer: any, deltaTime: number) {
+  /**
+   * フレームごとの更新処理
+   * @description 時間経過に伴うアニメーション（timeユニフォームの更新）を行う
+   * @param _renderer WebGLレンダラー (未使用)
+   * @param _inputBuffer 入力バッファ (未使用)
+   * @param deltaTime 前回のフレームからの経過時間
+   */
+  update(_renderer: WebGLRenderer, _inputBuffer: WebGLRenderTarget, deltaTime: number): void {
     const time = this.uniforms.get('time')
     if (time) {
       time.value += deltaTime
@@ -72,15 +58,15 @@ class CyberpunkEffectImpl extends Effect {
   }
 }
 
-// Reactコンポーネント用Props
-interface CyberpunkEffectProps {
-  scanlineDensity?: number
-  scanlineStrength?: number
-  noiseStrength?: number
-  rgbShiftStrength?: number
-}
-
-// Reactコンポーネントとしてのラッパー
+/**
+ * CyberpunkEffectコンポーネント
+ * @description React Three Fiberで使用するCyberpunkエフェクトのラッパーコンポーネント
+ * 
+ * 以下の視覚効果を提供:
+ * - スキャンライン (Scanlines)
+ * - ノイズ (Noise)
+ * - 色収差 (RGB Shift)
+ */
 export const CyberpunkEffect = forwardRef<CyberpunkEffectImpl, CyberpunkEffectProps>(
   ({ scanlineDensity = 1.0, scanlineStrength = 0.3, noiseStrength = 0.1, rgbShiftStrength = 0.5 }, ref) => {
     const effect = useMemo(
