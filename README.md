@@ -36,7 +36,7 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 - **方位角/仰角制御**: 直感的なライト配置
 
 ### ポストエフェクト
-- **9種類のエフェクト**: Bloom、Vignette、DepthOfFieldなど
+- **10種類のエフェクト**: Bloom、Vignette、DepthOfField、Glitchなど
 - **リアルタイムプレビュー**: パラメータ変更を即座に反映
 
 ### UI/UX
@@ -298,6 +298,7 @@ flowchart TD
 | **ColorAverage** | モノクロ化 | - |
 | **Pixelation** | ピクセル化 | 粒度 (1-20) |
 | **DotScreen** | 網点効果 | スケール (0.5-3) |
+| **Glitch** | デジタルグリッチ（ノイズ・歪み・色収差） | 遅延 (min/max)、時間 (min/max)、強度 (弱/強) |
 
 ---
 
