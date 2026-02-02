@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react'
-import type { ViewerSettings } from '../types'
+import type { ViewerSettings, PostEffectSettings } from '../types'
 import { HDRI_LIST } from '../constants'
 
 /**
@@ -50,6 +50,14 @@ interface ColorConfig {
 }
 
 /**
+ * ポストエフェクト設定
+ */
+interface PostEffectConfig {
+  toggles: CheckboxConfig[]
+  sliders: SliderConfig[]
+}
+
+/**
  * フックの戻り値
  */
 interface UseControlPanelReturn {
@@ -76,6 +84,8 @@ interface UseControlPanelReturn {
     elevation: SliderConfig
     distance: SliderConfig
   }
+  /** ポストエフェクト設定 */
+  postEffects: PostEffectConfig
 }
 
 /**
@@ -99,6 +109,12 @@ export interface ControlPanelHandlers {
   onHdriIntensityChange: (value: number) => void
   onToggleHdri: () => void
   onReset: () => void
+  // ポストエフェクト関連
+  onUpdatePostEffectSetting: <K extends keyof PostEffectSettings>(
+    key: K,
+    value: PostEffectSettings[K]
+  ) => void
+  onTogglePostEffect: (key: keyof PostEffectSettings) => void
 }
 
 /**
@@ -127,6 +143,7 @@ export const useControlPanel = (
     hdriRotation,
     hdriIntensity,
     hdriEnabled,
+    postEffects,
   } = settings
 
   // チェックボックス設定
@@ -138,7 +155,6 @@ export const useControlPanel = (
   ], [wireframe, showGrid, showAxes, autoRotate, handlers])
 
   // 背景色設定
-  // モード選択とカラーピッカーの設定をまとめる
   const background = useMemo(() => ({
     mode: {
       label: '背景モード',
@@ -147,7 +163,6 @@ export const useControlPanel = (
         { label: '単色', value: 'color' },
         { label: 'HDRI', value: 'hdri' },
       ],
-      // 型注釈を追加してキャストを回避
       onChange: (value: number | string) => handlers.onBackgroundModeChange(value as 'color' | 'hdri'),
     },
     color: {
@@ -239,10 +254,46 @@ export const useControlPanel = (
     },
   }), [lightAzimuth, lightElevation, lightDistance, directionalLightEnabled, directionalLightColor, directionalLightIntensity, handlers])
 
+  // ポストエフェクト設定
+  const postEffectsConfig = useMemo<PostEffectConfig>(() => ({
+    toggles: [
+      { label: 'SMAA (AA)', checked: postEffects.smaaEnabled, onChange: () => handlers.onTogglePostEffect('smaaEnabled') },
+      { label: 'Bloom', checked: postEffects.bloomEnabled, onChange: () => handlers.onTogglePostEffect('bloomEnabled') },
+      { label: 'Vignette', checked: postEffects.vignetteEnabled, onChange: () => handlers.onTogglePostEffect('vignetteEnabled') },
+      { label: 'ToneMapping', checked: postEffects.toneMappingEnabled, onChange: () => handlers.onTogglePostEffect('toneMappingEnabled') },
+      { label: 'HueSaturation', checked: postEffects.hueSaturationEnabled, onChange: () => handlers.onTogglePostEffect('hueSaturationEnabled') },
+      { label: 'DepthOfField', checked: postEffects.depthOfFieldEnabled, onChange: () => handlers.onTogglePostEffect('depthOfFieldEnabled') },
+      { label: 'ColorAverage', checked: postEffects.colorAverageEnabled, onChange: () => handlers.onTogglePostEffect('colorAverageEnabled') },
+      { label: 'Pixelation', checked: postEffects.pixelationEnabled, onChange: () => handlers.onTogglePostEffect('pixelationEnabled') },
+      { label: 'DotScreen', checked: postEffects.dotScreenEnabled, onChange: () => handlers.onTogglePostEffect('dotScreenEnabled') },
+    ],
+    sliders: [
+      // Bloom
+      { label: 'Bloom強度', value: postEffects.bloomIntensity, min: 0, max: 3, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('bloomIntensity', v) },
+      { label: 'Bloom閾値', value: postEffects.bloomThreshold, min: 0, max: 1, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('bloomThreshold', v) },
+      // Vignette
+      { label: 'Vignette Offset', value: postEffects.vignetteOffset, min: 0, max: 1, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('vignetteOffset', v) },
+      { label: 'Vignette Darkness', value: postEffects.vignetteDarkness, min: 0, max: 1, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('vignetteDarkness', v) },
+      // HueSaturation
+      { label: '色相', value: postEffects.hue, min: -1, max: 1, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('hue', v) },
+      { label: '彩度', value: postEffects.saturation, min: -1, max: 1, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('saturation', v) },
+      // DepthOfField
+      { label: 'DoF Focus', value: postEffects.focusDistance, min: 0, max: 10, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('focusDistance', v) },
+      { label: 'DoF Focal', value: postEffects.focalLength, min: 0, max: 1, step: 0.01, onChange: (v) => handlers.onUpdatePostEffectSetting('focalLength', v) },
+      { label: 'DoF Bokeh', value: postEffects.bokehScale, min: 0, max: 10, step: 0.5, onChange: (v) => handlers.onUpdatePostEffectSetting('bokehScale', v) },
+      // Pixelation
+      { label: 'Pixel粒度', value: postEffects.pixelationGranularity, min: 1, max: 20, step: 1, onChange: (v) => handlers.onUpdatePostEffectSetting('pixelationGranularity', v) },
+      // DotScreen
+      { label: 'Dotスケール', value: postEffects.dotScreenScale, min: 0.5, max: 3, step: 0.1, onChange: (v) => handlers.onUpdatePostEffectSetting('dotScreenScale', v) },
+    ],
+  }), [postEffects, handlers])
+
   return {
     checkboxes,
     background,
     hdri,
     light,
+    postEffects: postEffectsConfig,
   }
 }
+

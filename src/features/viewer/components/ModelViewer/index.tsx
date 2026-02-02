@@ -11,6 +11,7 @@ import { DEFAULT_CAMERA_SETTINGS } from '../../constants'
 import { Environment } from '../Environment'
 import { Model } from '../Model'
 import { ControlPanel } from '../ControlPanel'
+import { PostEffects } from '../PostEffects'
 import styles from './ModelViewer.module.sass'
 
 /**
@@ -37,6 +38,8 @@ export const ModelViewer: FC = () => {
     toggleHdri,
     setBackgroundMode,
     resetSettings,
+    updatePostEffectSetting,
+    togglePostEffect,
   } = useModelViewer()
 
   // モデルローダーフック
@@ -72,6 +75,9 @@ export const ModelViewer: FC = () => {
     onHdriIntensityChange: setHdriIntensity,
     onToggleHdri: toggleHdri,
     onReset: resetSettings,
+    // ポストエフェクト関連
+    onUpdatePostEffectSetting: updatePostEffectSetting,
+    onTogglePostEffect: togglePostEffect,
   }
 
   return (
@@ -98,6 +104,9 @@ export const ModelViewer: FC = () => {
 
         {/* 3Dモデル */}
         <Model settings={settings} externalModel={modelObject} />
+
+        {/* ポストエフェクト */}
+        <PostEffects settings={settings.postEffects} />
 
         {/* カメラコントロール */}
         <OrbitControls

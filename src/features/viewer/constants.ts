@@ -3,7 +3,7 @@
  * @description 3Dモデルビューアーのデフォルト設定値
  */
 
-import type { CameraSettings, HdriItem, LightingSettings, ViewerSettings } from './types'
+import type { CameraSettings, HdriItem, LightingSettings, PostEffectSettings, ViewerSettings } from './types'
 
 /**
  * 利用可能なHDRIリスト
@@ -13,6 +13,41 @@ export const HDRI_LIST: readonly HdriItem[] = [
   { id: 1, name: 'Sunset', path: '/hdri/hdri-1.hdr' },
   { id: 2, name: 'Studio', path: '/hdri/hdri-2.hdr' },
 ] as const
+
+/**
+ * デフォルトのポストエフェクト設定
+ */
+export const DEFAULT_POST_EFFECT_SETTINGS: PostEffectSettings = {
+  // Bloom
+  bloomEnabled: false,
+  bloomIntensity: 1.0,
+  bloomThreshold: 0.9,
+  // Vignette
+  vignetteEnabled: false,
+  vignetteOffset: 0.5,
+  vignetteDarkness: 0.5,
+  // ToneMapping
+  toneMappingEnabled: false,
+  // SMAA
+  smaaEnabled: true,
+  // HueSaturation
+  hueSaturationEnabled: false,
+  hue: 0,
+  saturation: 0,
+  // DepthOfField
+  depthOfFieldEnabled: false,
+  focusDistance: 0.02,
+  focalLength: 0.5,
+  bokehScale: 2,
+  // ColorAverage
+  colorAverageEnabled: false,
+  // Pixelation
+  pixelationEnabled: false,
+  pixelationGranularity: 5,
+  // DotScreen
+  dotScreenEnabled: false,
+  dotScreenScale: 1.0,
+}
 
 /**
  * デフォルトのビューアー設定
@@ -34,6 +69,7 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
   hdriIntensity: 0.5,
   hdriEnabled: true,
   backgroundMode: 'color',
+  postEffects: DEFAULT_POST_EFFECT_SETTINGS,
 }
 
 /**

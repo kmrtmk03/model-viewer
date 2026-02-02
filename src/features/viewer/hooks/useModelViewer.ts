@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from 'react'
-import type { ViewerSettings } from '../types'
+import type { ViewerSettings, PostEffectSettings } from '../types'
 import { DEFAULT_VIEWER_SETTINGS, HDRI_LIST } from '../constants'
 
 /**
@@ -13,6 +13,14 @@ import { DEFAULT_VIEWER_SETTINGS, HDRI_LIST } from '../constants'
 type UpdateSettingFn = <K extends keyof ViewerSettings>(
   key: K,
   value: ViewerSettings[K]
+) => void
+
+/**
+ * ポストエフェクト設定更新関数の型
+ */
+type UpdatePostEffectFn = <K extends keyof PostEffectSettings>(
+  key: K,
+  value: PostEffectSettings[K]
 ) => void
 
 /**
@@ -57,6 +65,10 @@ interface UseModelViewerReturn {
   resetSettings: () => void
   /** 汎用設定更新 */
   updateSetting: UpdateSettingFn
+  /** ポストエフェクト設定更新 */
+  updatePostEffectSetting: UpdatePostEffectFn
+  /** ポストエフェクトトグル */
+  togglePostEffect: (key: keyof PostEffectSettings) => void
 }
 
 /**
@@ -69,6 +81,28 @@ export const useModelViewer = (): UseModelViewerReturn => {
   // 汎用設定更新関数
   const updateSetting: UpdateSettingFn = useCallback((key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }))
+  }, [])
+
+  // ポストエフェクト設定更新関数
+  const updatePostEffectSetting: UpdatePostEffectFn = useCallback((key, value) => {
+    setSettings(prev => ({
+      ...prev,
+      postEffects: {
+        ...prev.postEffects,
+        [key]: value,
+      },
+    }))
+  }, [])
+
+  // ポストエフェクトトグル関数
+  const togglePostEffect = useCallback((key: keyof PostEffectSettings) => {
+    setSettings(prev => ({
+      ...prev,
+      postEffects: {
+        ...prev.postEffects,
+        [key]: !prev.postEffects[key],
+      },
+    }))
   }, [])
 
   // トグル関数
@@ -163,5 +197,8 @@ export const useModelViewer = (): UseModelViewerReturn => {
     setDirectionalLightIntensity,
     resetSettings,
     updateSetting,
+    updatePostEffectSetting,
+    togglePostEffect,
   }
 }
+

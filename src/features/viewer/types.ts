@@ -63,6 +63,8 @@ export interface ViewerSettings {
   hdriEnabled: boolean
   /** 背景モード */
   backgroundMode: 'color' | 'hdri'
+  /** ポストエフェクト設定 */
+  postEffects: PostEffectSettings
 }
 
 /**
@@ -102,3 +104,67 @@ export interface LoadedModel {
   /** ファイル名 */
   name: string
 }
+
+/**
+ * ポストエフェクト設定
+ */
+export interface PostEffectSettings {
+  // Bloom（発光効果）
+  /** Bloom有効 */
+  bloomEnabled: boolean
+  /** Bloom強度 */
+  bloomIntensity: number
+  /** Bloomしきい値 */
+  bloomThreshold: number
+
+  // Vignette（周辺減光）
+  /** Vignette有効 */
+  vignetteEnabled: boolean
+  /** Vignetteオフセット */
+  vignetteOffset: number
+  /** Vignette暗さ */
+  vignetteDarkness: number
+
+  // ToneMapping（色調マッピング）
+  /** ToneMapping有効 */
+  toneMappingEnabled: boolean
+
+  // SMAA（アンチエイリアシング）
+  /** SMAA有効 */
+  smaaEnabled: boolean
+
+  // HueSaturation（色相・彩度）
+  /** HueSaturation有効 */
+  hueSaturationEnabled: boolean
+  /** 色相調整 (-1 to 1) */
+  hue: number
+  /** 彩度調整 (-1 to 1) */
+  saturation: number
+
+  // DepthOfField（被写界深度）
+  /** DepthOfField有効 */
+  depthOfFieldEnabled: boolean
+  /** フォーカス距離 */
+  focusDistance: number
+  /** 焦点距離 */
+  focalLength: number
+  /** ボケスケール */
+  bokehScale: number
+
+  // ColorAverage（モノクロ化）
+  /** ColorAverage有効 */
+  colorAverageEnabled: boolean
+
+  // Pixelation（ピクセル化）
+  /** Pixelation有効 */
+  pixelationEnabled: boolean
+  /** ピクセル粒度 */
+  pixelationGranularity: number
+
+  // DotScreen（網点効果）
+  /** DotScreen有効 */
+  dotScreenEnabled: boolean
+  /** ドットスケール */
+  dotScreenScale: number
+}
+

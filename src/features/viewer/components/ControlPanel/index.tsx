@@ -8,8 +8,6 @@ import type { ViewerSettings } from '../../types'
 import { useControlPanel, type ControlPanelHandlers } from '../../hooks'
 import styles from './ControlPanel.module.sass'
 
-// ローカルのControlPanelHandlers定義を削除
-
 interface ControlPanelProps {
   /** ビューアー設定 */
   settings: ViewerSettings
@@ -23,7 +21,7 @@ interface ControlPanelProps {
  */
 export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
   // フックから設定を取得
-  const { checkboxes, background, hdri, light } = useControlPanel(settings, handlers)
+  const { checkboxes, background, hdri, light, postEffects } = useControlPanel(settings, handlers)
 
   return (
     <div className={styles.panel}>
@@ -197,6 +195,42 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
         ))}
       </div>
 
+      {/* ポストエフェクト設定 */}
+      <div className={styles.section}>
+        <h3 className={styles.sectionTitle}>✨ ポストエフェクト</h3>
+
+        {/* エフェクトトグル */}
+        <div className={styles.controls}>
+          {postEffects.toggles.map((toggle) => (
+            <label key={toggle.label} className={styles.control}>
+              <input
+                type="checkbox"
+                checked={toggle.checked}
+                onChange={toggle.onChange}
+              />
+              <span>{toggle.label}</span>
+            </label>
+          ))}
+        </div>
+
+        {/* エフェクトスライダー */}
+        {postEffects.sliders.map((slider) => (
+          <div key={slider.label} className={styles.slider}>
+            <label>
+              <span>{slider.label}: {slider.value.toFixed(2)}</span>
+              <input
+                type="range"
+                min={slider.min}
+                max={slider.max}
+                step={slider.step}
+                value={slider.value}
+                onChange={(e) => slider.onChange(Number(e.target.value))}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+
       {/* リセット */}
       <button className={styles.resetButton} onClick={handlers.onReset}>
         設定リセット
@@ -204,3 +238,4 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
     </div>
   )
 }
+
