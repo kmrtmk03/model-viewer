@@ -211,33 +211,33 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
 
       {/* ============================================ */}
       {/* ポストエフェクトセクション */}
-      {/* 各種エフェクトのトグルとパラメータ調整 */}
+      {/* 各エフェクトをサブアコーディオンでグループ化 */}
       {/* ============================================ */}
       <Accordion title="✨ ポストエフェクト" defaultOpen={false}>
-        {/* エフェクトトグル */}
-        <div className={styles.controls}>
-          {postEffects.toggles.map((toggle) => (
+        {/* 各エフェクトをサブアコーディオンで表示 */}
+        {postEffects.effects.map((effect) => (
+          <Accordion key={effect.name} title={effect.name} defaultOpen={false}>
+            {/* エフェクトの有効/無効トグル */}
             <CheckboxControl
-              key={toggle.label}
-              label={toggle.label}
-              checked={toggle.checked}
-              onChange={toggle.onChange}
+              label={effect.toggle.label}
+              checked={effect.toggle.checked}
+              onChange={effect.toggle.onChange}
             />
-          ))}
-        </div>
-
-        {/* エフェクトパラメータスライダー */}
-        {postEffects.sliders.map((slider) => (
-          <SliderControl
-            key={slider.label}
-            label={slider.label}
-            value={slider.value}
-            min={slider.min}
-            max={slider.max}
-            step={slider.step}
-            decimals={2}
-            onChange={slider.onChange}
-          />
+            {/* エフェクトパラメータスライダー（存在する場合） */}
+            {effect.sliders.map((slider) => (
+              <SliderControl
+                key={slider.label}
+                label={slider.label}
+                value={slider.value}
+                min={slider.min}
+                max={slider.max}
+                step={slider.step}
+                unit={slider.unit}
+                decimals={2}
+                onChange={slider.onChange}
+              />
+            ))}
+          </Accordion>
         ))}
       </Accordion>
 
