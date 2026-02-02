@@ -271,6 +271,24 @@ export const usePostEffectsConfig = (
           createTupleSlider(postEffects, handlers, '強度(強)', 'glitchStrength', 1, GLITCH_SLIDER_RANGES.strength.strong),
         ],
       },
+
+      // ------------------------------------------
+      // Cyberpunk（カスタムシェーダー効果）
+      // ------------------------------------------
+      {
+        name: 'Cyberpunk',
+        toggle: createToggle(postEffects, handlers, 'cyberpunkEnabled'),
+        sliders: [
+          createSlider('スキャンライン密度', postEffects.cyberpunkScanlineDensity, POST_EFFECT_SLIDER_RANGES.cyberpunkScanlineDensity,
+            (v) => handlers.onUpdatePostEffectSetting('cyberpunkScanlineDensity', v)),
+          createSlider('スキャンライン強度', postEffects.cyberpunkScanlineStrength, POST_EFFECT_SLIDER_RANGES.cyberpunkScanlineStrength,
+            (v) => handlers.onUpdatePostEffectSetting('cyberpunkScanlineStrength', v)),
+          createSlider('ノイズ強度', postEffects.cyberpunkNoiseStrength, POST_EFFECT_SLIDER_RANGES.cyberpunkNoiseStrength,
+            (v) => handlers.onUpdatePostEffectSetting('cyberpunkNoiseStrength', v)),
+          createSlider('RGBシフト', postEffects.cyberpunkRgbShiftStrength, POST_EFFECT_SLIDER_RANGES.cyberpunkRgbShiftStrength,
+            (v) => handlers.onUpdatePostEffectSetting('cyberpunkRgbShiftStrength', v)),
+        ],
+      },
     ],
   }), [postEffects, handlers])
 }

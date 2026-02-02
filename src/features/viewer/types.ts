@@ -343,6 +343,41 @@ export interface PostEffectSettings {
    * @default [0.3, 1.0]
    */
   glitchStrength: [number, number]
+
+  // ==========================================
+  // Cyberpunk（カスタムシェーダー効果）
+  // スキャンライン、ノイズ、RGBシフト
+  // ==========================================
+
+  /** 
+   * Cyberpunkエフェクト有効フラグ
+   * @default false
+   */
+  cyberpunkEnabled: boolean
+
+  /** 
+   * スキャンライン密度
+   * @default 1.0
+   */
+  cyberpunkScanlineDensity: number
+
+  /** 
+   * スキャンライン強度
+   * @default 0.3
+   */
+  cyberpunkScanlineStrength: number
+
+  /** 
+   * ノイズ強度
+   * @default 0.1
+   */
+  cyberpunkNoiseStrength: number
+
+  /** 
+   * RGBシフト強度
+   * @default 0.5
+   */
+  cyberpunkRgbShiftStrength: number
 }
 
 
