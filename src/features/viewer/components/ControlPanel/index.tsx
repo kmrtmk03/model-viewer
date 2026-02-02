@@ -57,7 +57,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 表示設定セクション */}
       {/* グリッド、ワイヤーフレーム等の表示トグル */}
       {/* ============================================ */}
-      <Accordion title="🎮 表示設定" defaultOpen={true}>
+      <Accordion title="表示設定" defaultOpen={true}>
         <div className={styles.controls}>
           {checkboxes.map((checkbox) => (
             <CheckboxControl
@@ -74,7 +74,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 背景設定セクション */}
       {/* 背景モード（透明/単色）と色の選択 */}
       {/* ============================================ */}
-      <Accordion title="🎨 背景設定" defaultOpen={false}>
+      <Accordion title="背景設定" defaultOpen={false}>
         {/* 背景モード選択（ラジオボタン） */}
         <div className={styles.radioGroup}>
           <span className={styles.label}>{background.mode.label}:</span>
@@ -113,7 +113,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 環境マップ（HDRI）セクション */}
       {/* HDRI選択、回転、強度の調整 */}
       {/* ============================================ */}
-      <Accordion title="🌄 環境マップ" defaultOpen={false}>
+      <Accordion title="環境マップ" defaultOpen={false}>
         {/* HDRI有効/無効トグル */}
         <CheckboxControl
           label={hdri.enabled.label}
@@ -164,7 +164,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* ライト設定セクション */}
       {/* ライト色、強度、位置（球面座標）の調整 */}
       {/* ============================================ */}
-      <Accordion title="💡 ライト設定" defaultOpen={false}>
+      <Accordion title="ライト設定" defaultOpen={false}>
         {/* ライト有効/無効トグル */}
         <CheckboxControl
           label={light.enabled.label}
@@ -213,7 +213,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* ポストエフェクトセクション */}
       {/* 各エフェクトをサブアコーディオンでグループ化 */}
       {/* ============================================ */}
-      <Accordion title="✨ ポストエフェクト" defaultOpen={false}>
+      <Accordion title="ポストエフェクト" defaultOpen={false}>
         {/* 各エフェクトをサブアコーディオンで表示 */}
         {postEffects.effects.map((effect) => (
           <Accordion key={effect.name} title={effect.name} defaultOpen={false}>
