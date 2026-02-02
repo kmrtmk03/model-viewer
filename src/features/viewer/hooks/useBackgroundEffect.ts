@@ -3,7 +3,7 @@
  * @description シーンの背景色や環境マップの設定変更による副作用を管理
  */
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Color } from 'three'
 import type { Scene } from 'three'
 
@@ -25,17 +25,24 @@ export const useBackgroundEffect = ({
   backgroundMode,
   backgroundColor,
 }: UseBackgroundEffectProps): void => {
+  const sceneRef = useRef(scene)
+
+  useEffect(() => {
+    sceneRef.current = scene
+  }, [scene])
+
   // 背景色設定（Colorモード時）
   // <color attach="background" /> はDreiEnvironmentとの競合で
   // 意図した挙動にならない場合があるため、直接scene.backgroundを操作する
   useEffect(() => {
+    const targetScene = sceneRef.current
     if (backgroundMode === 'color') {
-      scene.background = new Color(backgroundColor)
+      targetScene.background = new Color(backgroundColor)
     } else {
       // HDRIモード時はDreiEnvironmentが背景を管理するため、
       // ここでは特に何もしない（あるいはnullにしてクリアする等の処理が必要な場合はここに追加）
       // 現状の実装ではDreiEnvironmentのbackgroundプロパティが制御するため競合しないようにする
-      scene.background = null
+      targetScene.background = null
     }
   }, [backgroundMode, backgroundColor, scene])
 }
