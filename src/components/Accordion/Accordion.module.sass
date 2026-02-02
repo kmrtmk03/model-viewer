@@ -1,0 +1,56 @@
+/**
+ * アコーディオンのスタイル
+ * スムーズな開閉アニメーション付き
+ */
+
+// アコーディオン本体
+.accordion
+  border-top: 1px solid rgba(255, 255, 255, 0.1)
+
+  &:first-child
+    border-top: none
+
+// ヘッダー（クリック可能）
+.header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  width: 100%
+  padding: v.$spacing-sm 0
+  background: transparent
+  border: none
+  cursor: pointer
+  text-align: left
+  transition: opacity 0.2s ease
+
+  &:hover
+    opacity: 0.8
+
+// タイトル
+.title
+  font-size: 12px
+  font-weight: 500
+  color: rgba(255, 255, 255, 0.7)
+
+// アイコン（矢印）
+.icon
+  font-size: 10px
+  color: rgba(255, 255, 255, 0.5)
+  transition: transform 0.3s ease
+
+  &.open
+    transform: rotate(180deg)
+
+// コンテンツ（開閉アニメーション）
+.content
+  max-height: 0
+  overflow: hidden
+  transition: max-height 0.3s ease-out
+
+  &.expanded
+    max-height: 1000px
+    transition: max-height 0.5s ease-in
+
+// コンテンツ内側
+.inner
+  padding: v.$spacing-xs 0 v.$spacing-sm 0

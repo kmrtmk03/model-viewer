@@ -1,11 +1,15 @@
 /**
  * コントロールパネルコンポーネント
  * @description ビューアー設定UIを描画（ビュー専念）
+ * 
+ * アコーディオン形式で各セクションを折りたたみ可能にし、
+ * パネルの長さを調整可能にする。
  */
 
 import type { FC } from 'react'
 import type { ViewerSettings } from '../../types'
 import { useControlPanel, type ControlPanelHandlers } from '../../hooks'
+import { Accordion } from '../../../../components/Accordion'
 import styles from './ControlPanel.module.sass'
 
 interface ControlPanelProps {
@@ -18,6 +22,7 @@ interface ControlPanelProps {
 /**
  * コントロールパネル（ビュー専念）
  * ロジックはuseControlPanelフックで処理
+ * 各セクションはアコーディオン形式で折りたたみ可能
  */
 export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
   // フックから設定を取得
@@ -27,24 +32,24 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
     <div className={styles.panel}>
       <h2 className={styles.title}>コントロール</h2>
 
-      {/* チェックボックス群 */}
-      <div className={styles.controls}>
-        {checkboxes.map((checkbox) => (
-          <label key={checkbox.label} className={styles.control}>
-            <input
-              type="checkbox"
-              checked={checkbox.checked}
-              onChange={checkbox.onChange}
-            />
-            <span>{checkbox.label}</span>
-          </label>
-        ))}
-      </div>
+      {/* 表示設定セクション */}
+      <Accordion title="🎮 表示設定" defaultOpen={true}>
+        <div className={styles.controls}>
+          {checkboxes.map((checkbox) => (
+            <label key={checkbox.label} className={styles.control}>
+              <input
+                type="checkbox"
+                checked={checkbox.checked}
+                onChange={checkbox.onChange}
+              />
+              <span>{checkbox.label}</span>
+            </label>
+          ))}
+        </div>
+      </Accordion>
 
       {/* 背景設定セクション */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>🎨 背景設定</h3>
-
+      <Accordion title="🎨 背景設定" defaultOpen={false}>
         {/* 背景モード選択（ラジオボタン） */}
         <div className={styles.radioGroup}>
           <span className={styles.label}>{background.mode.label}:</span>
@@ -77,12 +82,10 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
             </label>
           </div>
         )}
-      </div>
+      </Accordion>
 
       {/* HDRI設定 */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>🌄 環境マップ</h3>
-
+      <Accordion title="🌄 環境マップ" defaultOpen={false}>
         {/* HDRI有効/無効 */}
         <label className={styles.control}>
           <input
@@ -135,12 +138,10 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
             />
           </label>
         </div>
-      </div>
+      </Accordion>
 
       {/* ライト設定 */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>💡 ライト設定</h3>
-
+      <Accordion title="💡 ライト設定" defaultOpen={false}>
         {/* ライト有効/無効 */}
         <label className={styles.control}>
           <input
@@ -193,12 +194,10 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
             </label>
           </div>
         ))}
-      </div>
+      </Accordion>
 
       {/* ポストエフェクト設定 */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>✨ ポストエフェクト</h3>
-
+      <Accordion title="✨ ポストエフェクト" defaultOpen={false}>
         {/* エフェクトトグル */}
         <div className={styles.controls}>
           {postEffects.toggles.map((toggle) => (
@@ -229,7 +228,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
             </label>
           </div>
         ))}
-      </div>
+      </Accordion>
 
       {/* リセット */}
       <button className={styles.resetButton} onClick={handlers.onReset}>
@@ -238,4 +237,5 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
     </div>
   )
 }
+
 
