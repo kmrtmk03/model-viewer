@@ -14,8 +14,48 @@ export const HDRI_LIST: readonly HdriItem[] = [
   { id: 2, name: 'Studio', path: '/hdri/hdri-2.hdr' },
 ] as const
 
+// ==========================================
+// ポストエフェクト関連定数
+// ==========================================
+
+/**
+ * スライダー設定の型
+ * @description min/max/step値を定義
+ */
+interface SliderRange {
+  min: number
+  max: number
+  step: number
+}
+
+/**
+ * ポストエフェクトスライダー設定
+ * @description 各パラメータのmin/max/step値を集約
+ * useControlPanelで使用
+ */
+export const POST_EFFECT_SLIDER_RANGES = {
+  // Bloom
+  bloomIntensity: { min: 0, max: 3, step: 0.1 },
+  bloomThreshold: { min: 0, max: 1, step: 0.1 },
+  // Vignette
+  vignetteOffset: { min: 0, max: 1, step: 0.1 },
+  vignetteDarkness: { min: 0, max: 1, step: 0.1 },
+  // HueSaturation
+  hue: { min: -1, max: 1, step: 0.1 },
+  saturation: { min: -1, max: 1, step: 0.1 },
+  // DepthOfField
+  focusDistance: { min: 0, max: 10, step: 0.1 },
+  focalLength: { min: 0, max: 1, step: 0.01 },
+  bokehScale: { min: 0, max: 10, step: 0.5 },
+  // Pixelation
+  pixelationGranularity: { min: 1, max: 20, step: 1 },
+  // DotScreen
+  dotScreenScale: { min: 0.5, max: 3, step: 0.1 },
+} as const satisfies Record<string, SliderRange>
+
 /**
  * デフォルトのポストエフェクト設定
+ * @description 全エフェクトの初期値（SMAAのみデフォルト有効）
  */
 export const DEFAULT_POST_EFFECT_SETTINGS: PostEffectSettings = {
   // Bloom
@@ -28,7 +68,7 @@ export const DEFAULT_POST_EFFECT_SETTINGS: PostEffectSettings = {
   vignetteDarkness: 0.5,
   // ToneMapping
   toneMappingEnabled: false,
-  // SMAA
+  // SMAA（デフォルト有効 - 基本的なアンチエイリアシング）
   smaaEnabled: true,
   // HueSaturation
   hueSaturationEnabled: false,
@@ -100,3 +140,4 @@ export const GRID_CONFIG = {
   mainColor: '#444466',
   subColor: '#222233',
 } as const
+
