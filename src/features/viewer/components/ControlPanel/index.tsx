@@ -4,13 +4,25 @@
  * 
  * アコーディオン形式で各セクションを折りたたみ可能にし、
  * パネルの長さを調整可能にする。
+ * 
+ * セクション構成:
+ * 1. 表示設定 - グリッド、ワイヤーフレーム等のトグル
+ * 2. 背景設定 - 背景モードと色の選択
+ * 3. 環境マップ - HDRI選択と回転、強度調整
+ * 4. ライト設定 - ライト色、強度、位置の調整
+ * 5. ポストエフェクト - 各種エフェクトのトグルとパラメータ
  */
 
 import type { FC } from 'react'
 import type { ViewerSettings } from '../../types'
 import { useControlPanel, type ControlPanelHandlers } from '../../hooks'
 import { Accordion } from '../../../../components/Accordion'
+import { SliderControl, CheckboxControl } from './components'
 import styles from './ControlPanel.module.sass'
+
+// ============================================
+// 型定義
+// ============================================
 
 interface ControlPanelProps {
   /** ビューアー設定 */
@@ -19,10 +31,19 @@ interface ControlPanelProps {
   handlers: ControlPanelHandlers
 }
 
+// ============================================
+// コンポーネント
+// ============================================
+
 /**
  * コントロールパネル（ビュー専念）
- * ロジックはuseControlPanelフックで処理
- * 各セクションはアコーディオン形式で折りたたみ可能
+ * 
+ * ロジックはuseControlPanelフックで処理。
+ * 各セクションはアコーディオン形式で折りたたみ可能。
+ * UIはSliderControl、CheckboxControlコンポーネントを再利用。
+ * 
+ * @param props - コンポーネントProps
+ * @returns コントロールパネルUI
  */
 export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
   // フックから設定を取得
@@ -32,23 +53,27 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
     <div className={styles.panel}>
       <h2 className={styles.title}>コントロール</h2>
 
+      {/* ============================================ */}
       {/* 表示設定セクション */}
+      {/* グリッド、ワイヤーフレーム等の表示トグル */}
+      {/* ============================================ */}
       <Accordion title="🎮 表示設定" defaultOpen={true}>
         <div className={styles.controls}>
           {checkboxes.map((checkbox) => (
-            <label key={checkbox.label} className={styles.control}>
-              <input
-                type="checkbox"
-                checked={checkbox.checked}
-                onChange={checkbox.onChange}
-              />
-              <span>{checkbox.label}</span>
-            </label>
+            <CheckboxControl
+              key={checkbox.label}
+              label={checkbox.label}
+              checked={checkbox.checked}
+              onChange={checkbox.onChange}
+            />
           ))}
         </div>
       </Accordion>
 
+      {/* ============================================ */}
       {/* 背景設定セクション */}
+      {/* 背景モード（透明/単色）と色の選択 */}
+      {/* ============================================ */}
       <Accordion title="🎨 背景設定" defaultOpen={false}>
         {/* 背景モード選択（ラジオボタン） */}
         <div className={styles.radioGroup}>
@@ -84,18 +109,19 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
         )}
       </Accordion>
 
-      {/* HDRI設定 */}
+      {/* ============================================ */}
+      {/* 環境マップ（HDRI）セクション */}
+      {/* HDRI選択、回転、強度の調整 */}
+      {/* ============================================ */}
       <Accordion title="🌄 環境マップ" defaultOpen={false}>
-        {/* HDRI有効/無効 */}
-        <label className={styles.control}>
-          <input
-            type="checkbox"
-            checked={hdri.enabled.checked}
-            onChange={hdri.enabled.onChange}
-          />
-          <span>{hdri.enabled.label}</span>
-        </label>
+        {/* HDRI有効/無効トグル */}
+        <CheckboxControl
+          label={hdri.enabled.label}
+          checked={hdri.enabled.checked}
+          onChange={hdri.enabled.onChange}
+        />
 
+        {/* HDRI選択ドロップダウン */}
         <div className={styles.select}>
           <label>
             <span>{hdri.select.label}</span>
@@ -112,47 +138,41 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
           </label>
         </div>
 
-        <div className={styles.slider}>
-          <label>
-            <span>{hdri.rotation.label}: {hdri.rotation.value}{hdri.rotation.unit}</span>
-            <input
-              type="range"
-              min={hdri.rotation.min}
-              max={hdri.rotation.max}
-              value={hdri.rotation.value}
-              onChange={(e) => hdri.rotation.onChange(Number(e.target.value))}
-            />
-          </label>
-        </div>
+        {/* HDRI回転スライダー */}
+        <SliderControl
+          label={hdri.rotation.label}
+          value={hdri.rotation.value}
+          min={hdri.rotation.min}
+          max={hdri.rotation.max}
+          unit={hdri.rotation.unit}
+          onChange={hdri.rotation.onChange}
+        />
 
-        <div className={styles.slider}>
-          <label>
-            <span>{hdri.intensity.label}: {hdri.intensity.value.toFixed(1)}</span>
-            <input
-              type="range"
-              min={hdri.intensity.min}
-              max={hdri.intensity.max}
-              step={hdri.intensity.step}
-              value={hdri.intensity.value}
-              onChange={(e) => hdri.intensity.onChange(Number(e.target.value))}
-            />
-          </label>
-        </div>
+        {/* HDRI強度スライダー */}
+        <SliderControl
+          label={hdri.intensity.label}
+          value={hdri.intensity.value}
+          min={hdri.intensity.min}
+          max={hdri.intensity.max}
+          step={hdri.intensity.step}
+          decimals={1}
+          onChange={hdri.intensity.onChange}
+        />
       </Accordion>
 
-      {/* ライト設定 */}
+      {/* ============================================ */}
+      {/* ライト設定セクション */}
+      {/* ライト色、強度、位置（球面座標）の調整 */}
+      {/* ============================================ */}
       <Accordion title="💡 ライト設定" defaultOpen={false}>
-        {/* ライト有効/無効 */}
-        <label className={styles.control}>
-          <input
-            type="checkbox"
-            checked={light.enabled.checked}
-            onChange={light.enabled.onChange}
-          />
-          <span>{light.enabled.label}</span>
-        </label>
+        {/* ライト有効/無効トグル */}
+        <CheckboxControl
+          label={light.enabled.label}
+          checked={light.enabled.checked}
+          onChange={light.enabled.onChange}
+        />
 
-        {/* ライト色 */}
+        {/* ライト色ピッカー */}
         <div className={styles.colorPicker}>
           <label>
             <span>{light.color.label}</span>
@@ -164,78 +184,72 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
           </label>
         </div>
 
-        {/* ライト強度 */}
-        <div className={styles.slider}>
-          <label>
-            <span>{light.intensity.label}: {light.intensity.value.toFixed(1)}</span>
-            <input
-              type="range"
-              min={light.intensity.min}
-              max={light.intensity.max}
-              step={light.intensity.step}
-              value={light.intensity.value}
-              onChange={(e) => light.intensity.onChange(Number(e.target.value))}
-            />
-          </label>
-        </div>
+        {/* ライト強度スライダー */}
+        <SliderControl
+          label={light.intensity.label}
+          value={light.intensity.value}
+          min={light.intensity.min}
+          max={light.intensity.max}
+          step={light.intensity.step}
+          decimals={1}
+          onChange={light.intensity.onChange}
+        />
 
-        {/* 方位角/仰角/距離 */}
+        {/* 方位角/仰角/距離スライダー */}
         {[light.azimuth, light.elevation, light.distance].map((slider) => (
-          <div key={slider.label} className={styles.slider}>
-            <label>
-              <span>{slider.label}: {slider.value}{slider.unit || ''}</span>
-              <input
-                type="range"
-                min={slider.min}
-                max={slider.max}
-                value={slider.value}
-                onChange={(e) => slider.onChange(Number(e.target.value))}
-              />
-            </label>
-          </div>
+          <SliderControl
+            key={slider.label}
+            label={slider.label}
+            value={slider.value}
+            min={slider.min}
+            max={slider.max}
+            unit={slider.unit}
+            onChange={slider.onChange}
+          />
         ))}
       </Accordion>
 
-      {/* ポストエフェクト設定 */}
+      {/* ============================================ */}
+      {/* ポストエフェクトセクション */}
+      {/* 各種エフェクトのトグルとパラメータ調整 */}
+      {/* ============================================ */}
       <Accordion title="✨ ポストエフェクト" defaultOpen={false}>
         {/* エフェクトトグル */}
         <div className={styles.controls}>
           {postEffects.toggles.map((toggle) => (
-            <label key={toggle.label} className={styles.control}>
-              <input
-                type="checkbox"
-                checked={toggle.checked}
-                onChange={toggle.onChange}
-              />
-              <span>{toggle.label}</span>
-            </label>
+            <CheckboxControl
+              key={toggle.label}
+              label={toggle.label}
+              checked={toggle.checked}
+              onChange={toggle.onChange}
+            />
           ))}
         </div>
 
-        {/* エフェクトスライダー */}
+        {/* エフェクトパラメータスライダー */}
         {postEffects.sliders.map((slider) => (
-          <div key={slider.label} className={styles.slider}>
-            <label>
-              <span>{slider.label}: {slider.value.toFixed(2)}</span>
-              <input
-                type="range"
-                min={slider.min}
-                max={slider.max}
-                step={slider.step}
-                value={slider.value}
-                onChange={(e) => slider.onChange(Number(e.target.value))}
-              />
-            </label>
-          </div>
+          <SliderControl
+            key={slider.label}
+            label={slider.label}
+            value={slider.value}
+            min={slider.min}
+            max={slider.max}
+            step={slider.step}
+            decimals={2}
+            onChange={slider.onChange}
+          />
         ))}
       </Accordion>
 
-      {/* リセット */}
+      {/* ============================================ */}
+      {/* 設定リセットボタン */}
+      {/* ============================================ */}
       <button className={styles.resetButton} onClick={handlers.onReset}>
         設定リセット
       </button>
     </div>
   )
 }
+
 
 
