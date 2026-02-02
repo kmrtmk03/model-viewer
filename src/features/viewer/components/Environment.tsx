@@ -4,12 +4,10 @@
  */
 
 import type { FC } from 'react'
-import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
-import { Color } from 'three'
 import { Grid, GizmoHelper, GizmoViewport, Environment as DreiEnvironment } from '@react-three/drei'
 import type { ViewerSettings } from '../types'
-import { useEnvironment } from '../hooks'
+import { useEnvironment, useBackgroundEffect } from '../hooks'
 
 interface EnvironmentProps {
   /** ビューアー設定 */
@@ -39,14 +37,12 @@ export const Environment: FC<EnvironmentProps> = ({ settings }) => {
     backgroundMode,
   } = useEnvironment(settings)
 
-  // 背景色設定（Colorモード時）
-  // <color attach="background" /> はDreiEnvironmentとの競合で
-  // 意図した挙動にならない場合があるため、明示的に制御する
-  useEffect(() => {
-    if (backgroundMode === 'color') {
-      scene.background = new Color(backgroundColor)
-    }
-  }, [backgroundMode, backgroundColor, scene])
+  // 背景エフェクト（副作用）を適用
+  useBackgroundEffect({
+    scene,
+    backgroundMode,
+    backgroundColor,
+  })
 
   return (
     <>

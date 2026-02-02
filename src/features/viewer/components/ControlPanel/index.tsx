@@ -43,11 +43,11 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
         ))}
       </div>
 
-      {/* 背景設定 */}
+      {/* 背景設定セクション */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>🎨 背景設定</h3>
 
-        {/* モード選択 */}
+        {/* 背景モード選択（ラジオボタン） */}
         <div className={styles.radioGroup}>
           <span className={styles.label}>{background.mode.label}:</span>
           <div className={styles.options}>
@@ -66,14 +66,14 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
           </div>
         </div>
 
-        {/* 背景色（Colorモード時のみ） */}
+        {/* 背景色（Colorモード時のみ表示） */}
         {background.mode.value === 'color' && (
           <div className={styles.colorPicker}>
             <label>
               <span>{background.color.label}</span>
               <input
                 type="color"
-                value={background.color.value as string}
+                value={background.color.value}
                 onChange={(e) => background.color.onChange(e.target.value)}
               />
             </label>

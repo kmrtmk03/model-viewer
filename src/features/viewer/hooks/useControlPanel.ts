@@ -36,7 +36,8 @@ interface SelectConfig {
   label: string
   value: number | string
   options: { value: number | string; label: string }[]
-  onChange: (value: any) => void
+  /** 選択変更時のコールバック (数値または文字列) */
+  onChange: (value: number | string) => void
 }
 
 /**
@@ -137,6 +138,7 @@ export const useControlPanel = (
   ], [wireframe, showGrid, showAxes, autoRotate, handlers])
 
   // 背景色設定
+  // モード選択とカラーピッカーの設定をまとめる
   const background = useMemo(() => ({
     mode: {
       label: '背景モード',
@@ -145,7 +147,8 @@ export const useControlPanel = (
         { label: '単色', value: 'color' },
         { label: 'HDRI', value: 'hdri' },
       ],
-      onChange: handlers.onBackgroundModeChange,
+      // 型注釈を追加してキャストを回避
+      onChange: (value: number | string) => handlers.onBackgroundModeChange(value as 'color' | 'hdri'),
     },
     color: {
       label: '背景色',
@@ -171,7 +174,7 @@ export const useControlPanel = (
       label: 'HDRI',
       value: hdriIndex,
       options: hdriOptions,
-      onChange: handlers.onHdriIndexChange,
+      onChange: (value: number | string) => handlers.onHdriIndexChange(Number(value)),
     },
     rotation: {
       label: '回転',
