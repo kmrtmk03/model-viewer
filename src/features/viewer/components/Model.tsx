@@ -3,9 +3,9 @@
  * @description 外部モデルまたはサンプル3Dオブジェクトを表示（ビュー専念）
  */
 
-import { useRef, type FC } from 'react'
+import { useRef, useEffect, type FC } from 'react'
 import { useFrame } from '@react-three/fiber'
-import type { Mesh, Group } from 'three'
+import type { Mesh, Group, MeshStandardMaterial } from 'three'
 import type { ViewerSettings } from '../types'
 
 interface ModelProps {
@@ -71,8 +71,36 @@ const SampleModel: FC<{ wireframe: boolean; autoRotate: boolean }> = ({ wirefram
 /**
  * 外部モデル表示コンポーネント
  */
-const ExternalModel: FC<{ model: Group; autoRotate: boolean }> = ({ model, autoRotate }) => {
+const ExternalModel: FC<{ model: Group; autoRotate: boolean; wireframe: boolean }> = ({
+  model,
+  autoRotate,
+  wireframe,
+}) => {
   const groupRef = useRef<Group>(null)
+
+  // ワイヤーフレーム設定の反映
+  // モデル内の全メッシュを走査し、マテリアルのwireframeプロパティを更新する
+  useEffect(() => {
+    if (!model) return
+
+    model.traverse((child) => {
+      if ((child as Mesh).isMesh) {
+        const mesh = child as Mesh
+        // マテリアルが配列の場合と単一の場合の両方に対応
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach((mat) => {
+            if ('wireframe' in mat) {
+              ; (mat as MeshStandardMaterial).wireframe = wireframe
+            }
+          })
+        } else {
+          if ('wireframe' in mesh.material) {
+            ; (mesh.material as MeshStandardMaterial).wireframe = wireframe
+          }
+        }
+      }
+    })
+  }, [model, wireframe])
 
   // 自動回転
   useFrame((_, delta) => {
@@ -96,7 +124,7 @@ export const Model: FC<ModelProps> = ({ settings, externalModel }) => {
 
   // 外部モデルがあれば表示、なければサンプルモデル
   if (externalModel) {
-    return <ExternalModel model={externalModel} autoRotate={autoRotate} />
+    return <ExternalModel model={externalModel} autoRotate={autoRotate} wireframe={wireframe} />
   }
 
   return <SampleModel wireframe={wireframe} autoRotate={autoRotate} />
