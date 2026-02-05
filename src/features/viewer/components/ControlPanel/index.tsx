@@ -13,7 +13,7 @@
  * 5. ポストエフェクト - 各種エフェクトのトグルとパラメータ
  */
 
-import type { FC } from 'react'
+import type { FC, RefObject } from 'react'
 import type { ViewerSettings } from '../../types'
 import { useControlPanel, type ControlPanelHandlers } from '../../hooks'
 import { Accordion } from '../../../../components/Accordion'
@@ -29,6 +29,8 @@ interface ControlPanelProps {
   settings: ViewerSettings
   /** ハンドラー */
   handlers: ControlPanelHandlers
+  /** ファイル入力用ref（インポート用） */
+  fileInputRef: RefObject<HTMLInputElement | null>
 }
 
 // ============================================
@@ -45,7 +47,7 @@ interface ControlPanelProps {
  * @param props - コンポーネントProps
  * @returns コントロールパネルUI
  */
-export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
+export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers, fileInputRef }) => {
   // フックから設定を取得
   const { checkboxes, background, hdri, light, postEffects } = useControlPanel(settings, handlers)
 
@@ -242,11 +244,29 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       </Accordion>
 
       {/* ============================================ */}
-      {/* 設定リセットボタン */}
+      {/* ボタングループ */}
+      {/* リセット・エクスポート・インポート */}
       {/* ============================================ */}
-      <button className={styles.resetButton} onClick={handlers.onReset}>
-        設定リセット
-      </button>
+      <div className={styles.buttonGroup}>
+        <button className={styles.resetButton} onClick={handlers.onReset}>
+          リセット
+        </button>
+        <button className={styles.exportButton} onClick={handlers.onExportSettings}>
+          エクスポート
+        </button>
+        <button className={styles.importButton} onClick={handlers.onImportSettings}>
+          インポート
+        </button>
+      </div>
+
+      {/* 隠しファイル入力（インポート用） */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        style={{ display: 'none' }}
+        aria-hidden="true"
+      />
     </div>
   )
 }

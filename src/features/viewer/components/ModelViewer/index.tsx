@@ -3,10 +3,11 @@
  * @description R3Fを使用した3Dモデル表示ビューアー（ビュー専念）
  */
 
-import type { FC } from 'react'
+import { useCallback, type FC } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { useModelViewer, useModelLoader } from '../../hooks'
+import { useModelViewer, useModelLoader, useSettingsIO } from '../../hooks'
+import type { ViewerSettings } from '../../types'
 import { DEFAULT_CAMERA_SETTINGS } from '../../constants'
 import { Environment } from '../Environment'
 import { Model } from '../Model'
@@ -40,7 +41,23 @@ export const ModelViewer: FC = () => {
     resetSettings,
     updatePostEffectSetting,
     togglePostEffect,
+    updateSetting,
   } = useModelViewer()
+
+  // 設定を一括で更新する関数（インポート時に使用）
+  const handleImportSettings = useCallback((newSettings: ViewerSettings) => {
+    // ViewerSettingsの各プロパティを個別に更新
+    Object.keys(newSettings).forEach((key) => {
+      const k = key as keyof ViewerSettings
+      updateSetting(k, newSettings[k])
+    })
+  }, [updateSetting])
+
+  // 設定エクスポート/インポートフック
+  const { exportSettings, triggerImport, fileInputRef } = useSettingsIO(
+    settings,
+    handleImportSettings
+  )
 
   // モデルローダーフック
   const {
@@ -78,6 +95,9 @@ export const ModelViewer: FC = () => {
     // ポストエフェクト関連
     onUpdatePostEffectSetting: updatePostEffectSetting,
     onTogglePostEffect: togglePostEffect,
+    // 設定エクスポート/インポート
+    onExportSettings: exportSettings,
+    onImportSettings: triggerImport,
   }
 
   return (
@@ -155,7 +175,7 @@ export const ModelViewer: FC = () => {
       )}
 
       {/* コントロールパネル */}
-      <ControlPanel settings={settings} handlers={handlers} />
+      <ControlPanel settings={settings} handlers={handlers} fileInputRef={fileInputRef} />
 
       {/* 操作ヒント */}
       <div className={styles.hint}>

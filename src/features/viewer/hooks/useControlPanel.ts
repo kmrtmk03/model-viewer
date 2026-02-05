@@ -169,6 +169,12 @@ export interface ControlPanelHandlers {
   ) => void
   /** ポストエフェクトのオン/オフ切替 */
   onTogglePostEffect: (key: keyof PostEffectSettings) => void
+
+  // 設定エクスポート/インポート
+  /** 設定をJSONファイルとしてエクスポート */
+  onExportSettings: () => void
+  /** JSONファイルから設定をインポート（ファイル選択ダイアログを開く） */
+  onImportSettings: () => void
 }
 
 // ==========================================

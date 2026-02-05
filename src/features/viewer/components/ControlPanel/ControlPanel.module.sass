@@ -315,22 +315,32 @@ $text-muted: rgba(255, 255, 255, 0.65)
         transform: scale(1.05)
         border-color: $cyber-cyan
 
-// リセットボタン
-.resetButton
+// ==========================================
+// ボタングループ
+// ==========================================
+
+// ボタンコンテナ
+.buttonGroup
+  display: flex
+  gap: 8px
   margin-top: 32px
-  width: 100%
-  padding: 12px 0
+
+// 共通ボタンスタイル
+.resetButton,
+.exportButton,
+.importButton
+  flex: 1
+  padding: 10px 0
   font-family: inherit
-  font-size: 11px
+  font-size: 10px
   font-weight: 700
-  letter-spacing: 0.12em
-  color: $text-muted
+  letter-spacing: 0.1em
+  text-transform: uppercase
   background: transparent
   border: 1px solid rgba(255, 255, 255, 0.1)
   border-radius: 8px
   cursor: pointer
   transition: all 0.3s ease
-  text-transform: uppercase
   position: relative
   overflow: hidden
 
@@ -341,14 +351,50 @@ $text-muted: rgba(255, 255, 255, 0.65)
     left: 0
     width: 0%
     height: 100%
-    background: rgba(255, 71, 87, 0.1)
     transition: width 0.3s ease
     z-index: -1
+
+// リセットボタン（赤）
+.resetButton
+  color: $text-muted
+
+  &::before
+    background: rgba(255, 71, 87, 0.1)
 
   &:hover
     color: #ff4757
     border-color: #ff4757
-    box-shadow: 0 0 20px rgba(255, 71, 87, 0.2)
+    box-shadow: 0 0 16px rgba(255, 71, 87, 0.2)
+
+    &::before
+      width: 100%
+
+// エクスポートボタン（シアン）
+.exportButton
+  color: $text-muted
+
+  &::before
+    background: rgba(0, 243, 255, 0.1)
+
+  &:hover
+    color: $cyber-cyan
+    border-color: $cyber-cyan
+    box-shadow: 0 0 16px rgba(0, 243, 255, 0.2)
+
+    &::before
+      width: 100%
+
+// インポートボタン（紫）
+.importButton
+  color: $text-muted
+
+  &::before
+    background: rgba(188, 19, 254, 0.1)
+
+  &:hover
+    color: $cyber-purple
+    border-color: $cyber-purple
+    box-shadow: 0 0 16px rgba(188, 19, 254, 0.2)
 
     &::before
       width: 100%
