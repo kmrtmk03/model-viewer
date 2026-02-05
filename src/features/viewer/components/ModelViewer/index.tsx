@@ -3,11 +3,10 @@
  * @description R3Fを使用した3Dモデル表示ビューアー（ビュー専念）
  */
 
-import { useCallback, type FC } from 'react'
+import type { FC } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useModelViewer, useModelLoader, useSettingsIO } from '../../hooks'
-import type { ViewerSettings } from '../../types'
 import { DEFAULT_CAMERA_SETTINGS } from '../../constants'
 import { Environment } from '../Environment'
 import { Model } from '../Model'
@@ -39,24 +38,16 @@ export const ModelViewer: FC = () => {
     toggleHdri,
     setBackgroundMode,
     resetSettings,
+    replaceSettings,
     updatePostEffectSetting,
     togglePostEffect,
-    updateSetting,
   } = useModelViewer()
 
-  // 設定を一括で更新する関数（インポート時に使用）
-  const handleImportSettings = useCallback((newSettings: ViewerSettings) => {
-    // ViewerSettingsの各プロパティを個別に更新
-    Object.keys(newSettings).forEach((key) => {
-      const k = key as keyof ViewerSettings
-      updateSetting(k, newSettings[k])
-    })
-  }, [updateSetting])
-
   // 設定エクスポート/インポートフック
+  // replaceSettingsを直接渡すことでインポート時に設定を一括置換
   const { exportSettings, triggerImport, fileInputRef } = useSettingsIO(
     settings,
-    handleImportSettings
+    replaceSettings
   )
 
   // モデルローダーフック
