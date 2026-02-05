@@ -36,12 +36,12 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 - **方位角/仰角制御**: 直感的なライト配置
 
 ### ポストエフェクト
-- **10種類のエフェクト**: Bloom、Vignette、DepthOfField、Glitchなど
+- **11種類のエフェクト**: Bloom、Vignette、DepthOfField、Glitch、Cyberpunkなど
 - **リアルタイムプレビュー**: パラメータ変更を即座に反映
 
 ### UI/UX
 - **アコーディオン形式パネル**: セクション別に折りたたみ可能
-- **再利用可能なUIコンポーネント**: SliderControl、CheckboxControl
+- **再利用可能なUIコンポーネント**: SliderControl、CheckboxControl、SelectControl
 
 ---
 
@@ -132,17 +132,21 @@ src/
 ├── App.sass                        # アプリ全体のスタイル
 │
 ├── components/                     # 共通コンポーネント
-│   └── Accordion/                  # 折りたたみUI
-│       ├── index.tsx               # コンポーネント本体
-│       ├── hooks/
-│       │   └── useAccordion.ts     # 開閉ロジック
-│       └── Accordion.module.sass   # スタイル
+│   ├── Accordion/                  # 折りたたみUI
+│   │   ├── index.tsx               # コンポーネント本体
+│   │   ├── hooks/
+│   │   │   └── useAccordion.ts     # 開閉ロジック
+│   │   └── Accordion.module.sass   # スタイル
+│   └── ui/                         # UIパーツ
+│       ├── CheckboxControl.tsx
+│       ├── SelectControl.tsx
+│       └── SliderControl.tsx
 │
 ├── features/
 │   └── viewer/                     # 3Dビューアー機能
 │       ├── index.ts                # バレルエクスポート
-│       ├── types.ts                # 型定義（317行）
-│       ├── constants.ts            # デフォルト設定（144行）
+│       ├── types.ts                # 型定義
+│       ├── constants.ts            # デフォルト設定
 │       │
 │       ├── components/
 │       │   ├── index.ts
@@ -151,7 +155,7 @@ src/
 │       │   ├── ControlPanel/       # 設定パネル
 │       │   │   ├── index.tsx
 │       │   │   ├── ControlPanel.module.sass
-│       │   │   └── components/
+│       │   │   └── components/     # パネル用ラッパー
 │       │   │       ├── index.ts
 │       │   │       ├── SliderControl.tsx
 │       │   │       └── CheckboxControl.tsx
@@ -159,6 +163,10 @@ src/
 │       │   ├── Environment.tsx     # HDRI環境
 │       │   └── PostEffects.tsx     # エフェクト処理
 │       │
+│       ├── effects/                # カスタムエフェクト
+│       │   └── CyberpunkEffect.tsx
+│       ├── shaders/                # シェーダー定義
+│       │   └── cyberpunkShader.ts
 │       └── hooks/
 │           ├── index.ts
 │           ├── useModelViewer.ts   # 状態管理（メインフック）
@@ -166,6 +174,13 @@ src/
 │           ├── useModelLoader.ts   # モデル読み込み
 │           ├── useEnvironment.ts   # HDRI管理
 │           └── useBackgroundEffect.ts
+│
+├── hooks/                          # 汎用フック
+│   ├── useModelViewer.ts
+│   └── useScrollLock.ts
+│
+├── libs/                           # ユーティリティ
+│   └── TimeUtil.ts
 │
 ├── styles/                         # グローバルスタイル
 │   ├── reset.sass                  # リセットCSS
@@ -267,9 +282,9 @@ flowchart TD
 </Accordion>
 ```
 
-### SliderControl / CheckboxControl
+### SliderControl / CheckboxControl / SelectControl
 
-プレゼンテーショナルコンポーネント。ControlPanel内で再利用。
+プレゼンテーショナルコンポーネント。`src/components/ui/` で定義され、ControlPanel内で再利用。
 
 ```tsx
 <SliderControl
@@ -299,6 +314,7 @@ flowchart TD
 | **Pixelation** | ピクセル化 | 粒度 (1-20) |
 | **DotScreen** | 網点効果 | スケール (0.5-3) |
 | **Glitch** | デジタルグリッチ（ノイズ・歪み・色収差） | 遅延 (min/max)、時間 (min/max)、強度 (弱/強) |
+| **Cyberpunk** | サイバーパンク風エフェクト | スキャンライン(密度/強度)、ノイズ強度、RGBシフト強度 |
 
 ---
 
