@@ -5,7 +5,18 @@
 
 import { useRef, useEffect, type FC } from 'react'
 import { useFrame } from '@react-three/fiber'
-import type { Mesh, Group, MeshStandardMaterial } from 'three'
+import {
+  BoxGeometry,
+  ConeGeometry,
+  CylinderGeometry,
+  SphereGeometry,
+  TorusGeometry,
+  type BufferGeometry,
+  type Mesh,
+  type Group,
+  type MeshStandardMaterial,
+  type Object3D,
+} from 'three'
 import type { ViewerSettings } from '../types'
 
 interface ModelProps {
@@ -13,14 +24,73 @@ interface ModelProps {
   settings: ViewerSettings
   /** 外部から読み込まれた3Dモデル */
   externalModel?: Group | null
+  /** ポリゴン数の更新通知 */
+  onPolygonCountChange?: (count: number) => void
 }
+
+/**
+ * ジオメトリから三角形数を取得
+ */
+const getTriangleCountFromGeometry = (geometry: BufferGeometry): number => {
+  if (geometry.index) {
+    return Math.floor(geometry.index.count / 3)
+  }
+
+  const positionAttribute = geometry.getAttribute('position')
+  if (!positionAttribute) {
+    return 0
+  }
+
+  return Math.floor(positionAttribute.count / 3)
+}
+
+/**
+ * Object3D配下の総三角形数を取得
+ */
+const getTriangleCountFromObject = (object: Object3D): number => {
+  let total = 0
+
+  object.traverse((child) => {
+    if ((child as Mesh).isMesh && (child as Mesh).geometry) {
+      total += getTriangleCountFromGeometry((child as Mesh).geometry as BufferGeometry)
+    }
+  })
+
+  return total
+}
+
+/**
+ * サンプルモデルの三角形数（構成ジオメトリから計算）
+ */
+const SAMPLE_TRIANGLE_COUNT = (() => {
+  const geometries: BufferGeometry[] = [
+    new BoxGeometry(1, 1, 1),
+    new SphereGeometry(0.5, 32, 32),
+    new TorusGeometry(0.4, 0.15, 16, 100),
+    new ConeGeometry(0.5, 1, 32),
+    new CylinderGeometry(0.4, 0.4, 1, 32),
+  ]
+
+  const total = geometries.reduce((sum, geometry) => sum + getTriangleCountFromGeometry(geometry), 0)
+  geometries.forEach((geometry) => geometry.dispose())
+
+  return total
+})()
 
 /**
  * サンプル3Dモデル（フォールバック用）
  */
-const SampleModel: FC<{ wireframe: boolean; autoRotate: boolean }> = ({ wireframe, autoRotate }) => {
+const SampleModel: FC<{ wireframe: boolean; autoRotate: boolean; onPolygonCountChange?: (count: number) => void }> = ({
+  wireframe,
+  autoRotate,
+  onPolygonCountChange,
+}) => {
   const groupRef = useRef<Group>(null)
   const torusRef = useRef<Mesh>(null)
+
+  useEffect(() => {
+    onPolygonCountChange?.(SAMPLE_TRIANGLE_COUNT)
+  }, [onPolygonCountChange])
 
   // アニメーション
   useFrame((_, delta) => {
@@ -71,12 +141,22 @@ const SampleModel: FC<{ wireframe: boolean; autoRotate: boolean }> = ({ wirefram
 /**
  * 外部モデル表示コンポーネント
  */
-const ExternalModel: FC<{ model: Group; autoRotate: boolean; wireframe: boolean }> = ({
+const ExternalModel: FC<{
+  model: Group
+  autoRotate: boolean
+  wireframe: boolean
+  onPolygonCountChange?: (count: number) => void
+}> = ({
   model,
   autoRotate,
   wireframe,
+  onPolygonCountChange,
 }) => {
   const groupRef = useRef<Group>(null)
+
+  useEffect(() => {
+    onPolygonCountChange?.(getTriangleCountFromObject(model))
+  }, [model, onPolygonCountChange])
 
   // ワイヤーフレーム設定の反映
   // モデル内の全メッシュを走査し、マテリアルのwireframeプロパティを更新する
@@ -119,13 +199,20 @@ const ExternalModel: FC<{ model: Group; autoRotate: boolean; wireframe: boolean 
 /**
  * 3Dモデルコンポーネント（ビュー専念）
  */
-export const Model: FC<ModelProps> = ({ settings, externalModel }) => {
+export const Model: FC<ModelProps> = ({ settings, externalModel, onPolygonCountChange }) => {
   const { wireframe, autoRotate } = settings
 
   // 外部モデルがあれば表示、なければサンプルモデル
   if (externalModel) {
-    return <ExternalModel model={externalModel} autoRotate={autoRotate} wireframe={wireframe} />
+    return (
+      <ExternalModel
+        model={externalModel}
+        autoRotate={autoRotate}
+        wireframe={wireframe}
+        onPolygonCountChange={onPolygonCountChange}
+      />
+    )
   }
 
-  return <SampleModel wireframe={wireframe} autoRotate={autoRotate} />
+  return <SampleModel wireframe={wireframe} autoRotate={autoRotate} onPolygonCountChange={onPolygonCountChange} />
 }

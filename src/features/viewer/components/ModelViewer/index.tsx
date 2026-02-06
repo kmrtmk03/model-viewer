@@ -3,7 +3,7 @@
  * @description R3Fを使用した3Dモデル表示ビューアー（ビュー専念）
  */
 
-import type { FC } from 'react'
+import { useCallback, useState, type FC } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useModelViewer, useModelLoader, useSettingsIO } from '../../hooks'
@@ -18,6 +18,8 @@ import styles from './ModelViewer.module.sass'
  * 3Dモデルビューアーコンポーネント（ビュー専念）
  */
 export const ModelViewer: FC = () => {
+  const [polygonCount, setPolygonCount] = useState(0)
+
   // フックから設定と操作関数を取得
   const {
     settings,
@@ -91,6 +93,10 @@ export const ModelViewer: FC = () => {
     onImportSettings: triggerImport,
   }
 
+  const handlePolygonCountChange = useCallback((count: number) => {
+    setPolygonCount(count)
+  }, [])
+
   return (
     <div
       className={styles.container}
@@ -114,7 +120,11 @@ export const ModelViewer: FC = () => {
         <Environment settings={settings} />
 
         {/* 3Dモデル */}
-        <Model settings={settings} externalModel={modelObject} />
+        <Model
+          settings={settings}
+          externalModel={modelObject}
+          onPolygonCountChange={handlePolygonCountChange}
+        />
 
         {/* ポストエフェクト */}
         <PostEffects settings={settings.postEffects} />
@@ -164,6 +174,11 @@ export const ModelViewer: FC = () => {
           <button onClick={clearModel} className={styles.clearButton}>✕</button>
         </div>
       )}
+
+      {/* ポリゴン数表示 */}
+      <div className={styles.polygonInfo}>
+        <span>ポリゴン数: {polygonCount.toLocaleString()}</span>
+      </div>
 
       {/* コントロールパネル */}
       <ControlPanel settings={settings} handlers={handlers} fileInputRef={fileInputRef} />
