@@ -10,6 +10,7 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 - [機能概要](#機能概要)
 - [使用技術](#使用技術)
 - [セットアップ](#セットアップ)
+- [対応ファイル形式](#対応ファイル形式)
 - [プロジェクト構成](#プロジェクト構成)
 - [アーキテクチャ](#アーキテクチャ)
 - [主要コンポーネント](#主要コンポーネント)
@@ -22,26 +23,28 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 ## 機能概要
 
 ### 3Dモデル表示
-- **GLB/GLTF形式対応**: ドラッグ&ドロップでモデル読み込み
+- **FBX/GLB/GLTF形式対応**: ドラッグ&ドロップでモデル読み込み
+- **自動正規化**: 読み込んだモデルを原点中心・適切なスケールに調整
 - **Wireframe表示**: メッシュ構造の確認
 - **自動回転**: モデルの360度プレビュー
 
 ### 環境設定
 - **HDRI環境マップ**: 3種類のプリセット（Sand、Sunset、Studio）
 - **環境光調整**: 強度・回転角度のリアルタイム調整
-- **背景設定**: 透明/単色の切り替え、カラーピッカーで色選択
+- **背景設定**: 単色/HDRIの切り替え、カラーピッカーで色選択
 
 ### ライティング
 - **ディレクショナルライト**: 位置（球面座標）、色、強度を調整
 - **方位角/仰角制御**: 直感的なライト配置
 
 ### ポストエフェクト
-- **10種類のエフェクト**: Bloom、Vignette、DepthOfField、Glitchなど
+- **11種類のエフェクト**: Bloom、Vignette、DepthOfField、Glitch、Cyberpunkなど
 - **リアルタイムプレビュー**: パラメータ変更を即座に反映
 
 ### UI/UX
 - **アコーディオン形式パネル**: セクション別に折りたたみ可能
-- **再利用可能なUIコンポーネント**: SliderControl、CheckboxControl
+- **再利用可能なUIコンポーネント**: SliderControl、CheckboxControl、SelectControl
+- **設定の入出力**: ビューアー設定をJSON形式でエクスポート/インポート
 
 ---
 
@@ -85,7 +88,7 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 
 ### 必要な環境
 
-- **Node.js**: v23.7.0 以上
+- **Node.js**: LTS版推奨（`node -v` で確認）
 - **パッケージマネージャー**: pnpm（推奨）
 
 ### インストール
@@ -123,6 +126,20 @@ pnpm preview
 
 ---
 
+## 対応ファイル形式
+
+| 拡張子 | ローダー | 備考 |
+|--------|----------|------|
+| `.fbx` | `FBXLoader` | 単一ファイルで読み込み可能 |
+| `.glb` | `GLTFLoader` | 単一ファイルで読み込み可能 |
+| `.gltf` | `GLTFLoader` | 外部`.bin`やテクスチャ参照がある場合は同一参照が必要 |
+
+補足:
+- ドラッグ&ドロップ時は最初の1ファイルのみ処理します。
+- 非対応形式をドロップした場合はUI上にエラーメッセージを表示します。
+
+---
+
 ## プロジェクト構成
 
 ```
@@ -132,17 +149,21 @@ src/
 ├── App.sass                        # アプリ全体のスタイル
 │
 ├── components/                     # 共通コンポーネント
-│   └── Accordion/                  # 折りたたみUI
-│       ├── index.tsx               # コンポーネント本体
-│       ├── hooks/
-│       │   └── useAccordion.ts     # 開閉ロジック
-│       └── Accordion.module.sass   # スタイル
+│   ├── Accordion/                  # 折りたたみUI
+│   │   ├── index.tsx               # コンポーネント本体
+│   │   ├── hooks/
+│   │   │   └── useAccordion.ts     # 開閉ロジック
+│   │   └── Accordion.module.sass   # スタイル
+│   └── ui/                         # UIパーツ
+│       ├── CheckboxControl.tsx
+│       ├── SelectControl.tsx
+│       └── SliderControl.tsx
 │
 ├── features/
 │   └── viewer/                     # 3Dビューアー機能
 │       ├── index.ts                # バレルエクスポート
-│       ├── types.ts                # 型定義（317行）
-│       ├── constants.ts            # デフォルト設定（144行）
+│       ├── types.ts                # 型定義
+│       ├── constants.ts            # デフォルト設定
 │       │
 │       ├── components/
 │       │   ├── index.ts
@@ -151,7 +172,7 @@ src/
 │       │   ├── ControlPanel/       # 設定パネル
 │       │   │   ├── index.tsx
 │       │   │   ├── ControlPanel.module.sass
-│       │   │   └── components/
+│       │   │   └── components/     # パネル用ラッパー
 │       │   │       ├── index.ts
 │       │   │       ├── SliderControl.tsx
 │       │   │       └── CheckboxControl.tsx
@@ -159,6 +180,10 @@ src/
 │       │   ├── Environment.tsx     # HDRI環境
 │       │   └── PostEffects.tsx     # エフェクト処理
 │       │
+│       ├── effects/                # カスタムエフェクト
+│       │   └── CyberpunkEffect.tsx
+│       ├── shaders/                # シェーダー定義
+│       │   └── cyberpunkShader.ts
 │       └── hooks/
 │           ├── index.ts
 │           ├── useModelViewer.ts   # 状態管理（メインフック）
@@ -166,6 +191,13 @@ src/
 │           ├── useModelLoader.ts   # モデル読み込み
 │           ├── useEnvironment.ts   # HDRI管理
 │           └── useBackgroundEffect.ts
+│
+├── hooks/                          # 汎用フック
+│   ├── useModelViewer.ts
+│   └── useScrollLock.ts
+│
+├── libs/                           # ユーティリティ
+│   └── TimeUtil.ts
 │
 ├── styles/                         # グローバルスタイル
 │   ├── reset.sass                  # リセットCSS
@@ -234,7 +266,7 @@ flowchart TD
 
 ### ModelViewer
 
-メインのビューアーコンポーネント。`Canvas`内で3Dシーンを構築。
+メインのビューアーコンポーネント。`Canvas`内で3Dシーンを構築し、設定状態・モデル読み込み・設定JSON入出力を統合。
 
 ```tsx
 <ModelViewer
@@ -267,9 +299,9 @@ flowchart TD
 </Accordion>
 ```
 
-### SliderControl / CheckboxControl
+### SliderControl / CheckboxControl / SelectControl
 
-プレゼンテーショナルコンポーネント。ControlPanel内で再利用。
+プレゼンテーショナルコンポーネント。`src/components/ui/` で定義され、ControlPanel内で再利用。
 
 ```tsx
 <SliderControl
@@ -299,6 +331,7 @@ flowchart TD
 | **Pixelation** | ピクセル化 | 粒度 (1-20) |
 | **DotScreen** | 網点効果 | スケール (0.5-3) |
 | **Glitch** | デジタルグリッチ（ノイズ・歪み・色収差） | 遅延 (min/max)、時間 (min/max)、強度 (弱/強) |
+| **Cyberpunk** | サイバーパンク風エフェクト | スキャンライン(密度/強度)、ノイズ強度、RGBシフト強度 |
 
 ---
 
@@ -318,6 +351,22 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
   // ... ライト設定
   // ... HDRI設定
   postEffects: DEFAULT_POST_EFFECT_SETTINGS,
+}
+```
+
+### 設定JSONのエクスポート/インポート
+
+`ControlPanel` の `エクスポート` / `インポート` ボタンで、現在設定をJSONとして保存・復元できます。  
+インポート時は `settingsValidator.ts` でランタイム検証を行い、不正な形式の読み込みを防止します。
+
+```json
+{
+  "version": "1.0",
+  "exportedAt": "2026-02-06T12:34:56.000Z",
+  "settings": {
+    "wireframe": false,
+    "showGrid": true
+  }
 }
 ```
 
@@ -341,6 +390,9 @@ export const HDRI_LIST: readonly HdriItem[] = [
 export default defineConfig({
   base: '/',
   plugins: [react()],
+  server: {
+    host: true,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -351,8 +403,8 @@ export default defineConfig({
       sass: {
         // variables と mixins を自動インポート
         additionalData: `
-@use "src/styles/variables/_index.sass" as v
-@use "src/styles/mixins/_index.sass" as m
+@use "${path.resolve(__dirname, 'src/styles/variables/_index.sass')}" as v
+@use "${path.resolve(__dirname, 'src/styles/mixins/_index.sass')}" as m
 `,
       },
     },

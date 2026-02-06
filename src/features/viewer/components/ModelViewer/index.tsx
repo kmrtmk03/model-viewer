@@ -3,21 +3,25 @@
  * @description R3Fを使用した3Dモデル表示ビューアー（ビュー専念）
  */
 
-import type { FC } from 'react'
+import { useCallback, useState, type FC } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { useModelViewer, useModelLoader } from '../../hooks'
+import { useModelViewer, useModelLoader, useSettingsIO } from '../../hooks'
 import { DEFAULT_CAMERA_SETTINGS } from '../../constants'
 import { Environment } from '../Environment'
 import { Model } from '../Model'
 import { ControlPanel } from '../ControlPanel'
 import { PostEffects } from '../PostEffects'
+import { PolygonInfo } from '../PolygonInfo'
 import styles from './ModelViewer.module.sass'
 
 /**
  * 3Dモデルビューアーコンポーネント（ビュー専念）
  */
 export const ModelViewer: FC = () => {
+  const [polygonCount, setPolygonCount] = useState(0)
+  const [materialList, setMaterialList] = useState<string[]>([])
+
   // フックから設定と操作関数を取得
   const {
     settings,
@@ -38,9 +42,17 @@ export const ModelViewer: FC = () => {
     toggleHdri,
     setBackgroundMode,
     resetSettings,
+    replaceSettings,
     updatePostEffectSetting,
     togglePostEffect,
   } = useModelViewer()
+
+  // 設定エクスポート/インポートフック
+  // replaceSettingsを直接渡すことでインポート時に設定を一括置換
+  const { exportSettings, triggerImport, fileInputRef } = useSettingsIO(
+    settings,
+    replaceSettings
+  )
 
   // モデルローダーフック
   const {
@@ -78,7 +90,18 @@ export const ModelViewer: FC = () => {
     // ポストエフェクト関連
     onUpdatePostEffectSetting: updatePostEffectSetting,
     onTogglePostEffect: togglePostEffect,
+    // 設定エクスポート/インポート
+    onExportSettings: exportSettings,
+    onImportSettings: triggerImport,
   }
+
+  const handlePolygonCountChange = useCallback((count: number) => {
+    setPolygonCount(count)
+  }, [])
+
+  const handleMaterialListChange = useCallback((materials: string[]) => {
+    setMaterialList(materials)
+  }, [])
 
   return (
     <div
@@ -103,7 +126,12 @@ export const ModelViewer: FC = () => {
         <Environment settings={settings} />
 
         {/* 3Dモデル */}
-        <Model settings={settings} externalModel={modelObject} />
+        <Model
+          settings={settings}
+          externalModel={modelObject}
+          onPolygonCountChange={handlePolygonCountChange}
+          onMaterialListChange={handleMaterialListChange}
+        />
 
         {/* ポストエフェクト */}
         <PostEffects settings={settings.postEffects} />
@@ -154,8 +182,11 @@ export const ModelViewer: FC = () => {
         </div>
       )}
 
+      {/* ポリゴン数・マテリアル情報表示 */}
+      <PolygonInfo polygonCount={polygonCount} materialList={materialList} />
+
       {/* コントロールパネル */}
-      <ControlPanel settings={settings} handlers={handlers} />
+      <ControlPanel settings={settings} handlers={handlers} fileInputRef={fileInputRef} />
 
       {/* 操作ヒント */}
       <div className={styles.hint}>

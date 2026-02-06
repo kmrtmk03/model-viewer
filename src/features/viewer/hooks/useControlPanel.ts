@@ -18,7 +18,8 @@
 
 import { useMemo } from 'react'
 import type { ViewerSettings, PostEffectSettings } from '../types'
-import { HDRI_LIST, POST_EFFECT_SLIDER_RANGES, GLITCH_SLIDER_RANGES } from '../constants'
+import { HDRI_LIST } from '../constants'
+import { usePostEffectsConfig, type PostEffectConfig } from './usePostEffectsConfig'
 
 // ==========================================
 // UI設定の型定義
@@ -86,16 +87,7 @@ interface ColorConfig {
   onChange: (color: string) => void
 }
 
-/**
- * ポストエフェクト設定
- * @description ポストエフェクトのトグルとスライダーを分離
- */
-interface PostEffectConfig {
-  /** エフェクトのオン/オフトグル */
-  toggles: CheckboxConfig[]
-  /** エフェクトパラメータのスライダー */
-  sliders: SliderConfig[]
-}
+// EffectGroup, PostEffectConfig は usePostEffectsConfig からインポート
 
 // ==========================================
 // フック戻り値の型定義
@@ -177,6 +169,12 @@ export interface ControlPanelHandlers {
   ) => void
   /** ポストエフェクトのオン/オフ切替 */
   onTogglePostEffect: (key: keyof PostEffectSettings) => void
+
+  // 設定エクスポート/インポート
+  /** 設定をJSONファイルとしてエクスポート */
+  onExportSettings: () => void
+  /** JSONファイルから設定をインポート（ファイル選択ダイアログを開く） */
+  onImportSettings: () => void
 }
 
 // ==========================================
@@ -334,144 +332,9 @@ export const useControlPanel = (
 
   // ------------------------------------------
   // ポストエフェクト設定
-  // POST_EFFECT_SLIDER_RANGES定数を活用してmin/max/stepを一元管理
+  // 別ファイル（usePostEffectsConfig）に分離してコードの保守性を向上
   // ------------------------------------------
-  const postEffectsConfig = useMemo<PostEffectConfig>(() => ({
-    // エフェクトのオン/オフトグル
-    toggles: [
-      { label: 'SMAA (AA)', checked: postEffects.smaaEnabled, onChange: () => handlers.onTogglePostEffect('smaaEnabled') },
-      { label: 'Bloom', checked: postEffects.bloomEnabled, onChange: () => handlers.onTogglePostEffect('bloomEnabled') },
-      { label: 'Vignette', checked: postEffects.vignetteEnabled, onChange: () => handlers.onTogglePostEffect('vignetteEnabled') },
-      { label: 'ToneMapping', checked: postEffects.toneMappingEnabled, onChange: () => handlers.onTogglePostEffect('toneMappingEnabled') },
-      { label: 'HueSaturation', checked: postEffects.hueSaturationEnabled, onChange: () => handlers.onTogglePostEffect('hueSaturationEnabled') },
-      { label: 'DepthOfField', checked: postEffects.depthOfFieldEnabled, onChange: () => handlers.onTogglePostEffect('depthOfFieldEnabled') },
-      { label: 'ColorAverage', checked: postEffects.colorAverageEnabled, onChange: () => handlers.onTogglePostEffect('colorAverageEnabled') },
-      { label: 'Pixelation', checked: postEffects.pixelationEnabled, onChange: () => handlers.onTogglePostEffect('pixelationEnabled') },
-      { label: 'DotScreen', checked: postEffects.dotScreenEnabled, onChange: () => handlers.onTogglePostEffect('dotScreenEnabled') },
-      { label: 'Glitch', checked: postEffects.glitchEnabled, onChange: () => handlers.onTogglePostEffect('glitchEnabled') },
-    ],
-    // エフェクトパラメータのスライダー
-    // POST_EFFECT_SLIDER_RANGESからmin/max/step値を取得
-    sliders: [
-      // Bloom（発光効果）
-      {
-        label: 'Bloom強度',
-        value: postEffects.bloomIntensity,
-        ...POST_EFFECT_SLIDER_RANGES.bloomIntensity,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('bloomIntensity', v),
-      },
-      {
-        label: 'Bloom閾値',
-        value: postEffects.bloomThreshold,
-        ...POST_EFFECT_SLIDER_RANGES.bloomThreshold,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('bloomThreshold', v),
-      },
-      // Vignette（周辺減光）
-      {
-        label: 'Vignette Offset',
-        value: postEffects.vignetteOffset,
-        ...POST_EFFECT_SLIDER_RANGES.vignetteOffset,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('vignetteOffset', v),
-      },
-      {
-        label: 'Vignette Darkness',
-        value: postEffects.vignetteDarkness,
-        ...POST_EFFECT_SLIDER_RANGES.vignetteDarkness,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('vignetteDarkness', v),
-      },
-      // HueSaturation（色相・彩度）
-      {
-        label: '色相',
-        value: postEffects.hue,
-        ...POST_EFFECT_SLIDER_RANGES.hue,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('hue', v),
-      },
-      {
-        label: '彩度',
-        value: postEffects.saturation,
-        ...POST_EFFECT_SLIDER_RANGES.saturation,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('saturation', v),
-      },
-      // DepthOfField（被写界深度）
-      {
-        label: 'DoF Focus',
-        value: postEffects.focusDistance,
-        ...POST_EFFECT_SLIDER_RANGES.focusDistance,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('focusDistance', v),
-      },
-      {
-        label: 'DoF Focal',
-        value: postEffects.focalLength,
-        ...POST_EFFECT_SLIDER_RANGES.focalLength,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('focalLength', v),
-      },
-      {
-        label: 'DoF Bokeh',
-        value: postEffects.bokehScale,
-        ...POST_EFFECT_SLIDER_RANGES.bokehScale,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('bokehScale', v),
-      },
-      // Pixelation（ピクセル化）
-      {
-        label: 'Pixel粒度',
-        value: postEffects.pixelationGranularity,
-        ...POST_EFFECT_SLIDER_RANGES.pixelationGranularity,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('pixelationGranularity', v),
-      },
-      // DotScreen（網点効果）
-      {
-        label: 'Dotスケール',
-        value: postEffects.dotScreenScale,
-        ...POST_EFFECT_SLIDER_RANGES.dotScreenScale,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('dotScreenScale', v),
-      },
-      // Glitch（グリッチ効果）
-      // タプル型パラメータのスライダー
-      // 発生間隔（delay）
-      {
-        label: 'Glitch遅延(min)',
-        value: postEffects.glitchDelay[0],
-        ...GLITCH_SLIDER_RANGES.delay.min,
-        unit: 's',
-        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDelay', [v, postEffects.glitchDelay[1]]),
-      },
-      {
-        label: 'Glitch遅延(max)',
-        value: postEffects.glitchDelay[1],
-        ...GLITCH_SLIDER_RANGES.delay.max,
-        unit: 's',
-        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDelay', [postEffects.glitchDelay[0], v]),
-      },
-      // 持続時間（duration）
-      {
-        label: 'Glitch時間(min)',
-        value: postEffects.glitchDuration[0],
-        ...GLITCH_SLIDER_RANGES.duration.min,
-        unit: 's',
-        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDuration', [v, postEffects.glitchDuration[1]]),
-      },
-      {
-        label: 'Glitch時間(max)',
-        value: postEffects.glitchDuration[1],
-        ...GLITCH_SLIDER_RANGES.duration.max,
-        unit: 's',
-        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchDuration', [postEffects.glitchDuration[0], v]),
-      },
-      // 強度（strength）
-      {
-        label: 'Glitch強度(弱)',
-        value: postEffects.glitchStrength[0],
-        ...GLITCH_SLIDER_RANGES.strength.weak,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchStrength', [v, postEffects.glitchStrength[1]]),
-      },
-      {
-        label: 'Glitch強度(強)',
-        value: postEffects.glitchStrength[1],
-        ...GLITCH_SLIDER_RANGES.strength.strong,
-        onChange: (v) => handlers.onUpdatePostEffectSetting('glitchStrength', [postEffects.glitchStrength[0], v]),
-      },
-    ],
-  }), [postEffects, handlers])
+  const postEffectsConfig = usePostEffectsConfig(postEffects, handlers)
 
   return {
     checkboxes,

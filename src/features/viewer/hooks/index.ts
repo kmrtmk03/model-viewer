@@ -6,3 +6,6 @@ export { useEnvironment } from './useEnvironment'
 export { useControlPanel, type ControlPanelHandlers } from './useControlPanel'
 export { useModelLoader } from './useModelLoader'
 export { useBackgroundEffect } from './useBackgroundEffect'
+export { usePostEffectsConfig } from './usePostEffectsConfig'
+export { useSettingsIO } from './useSettingsIO'
+

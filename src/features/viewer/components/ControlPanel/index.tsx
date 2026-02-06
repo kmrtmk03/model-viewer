@@ -13,7 +13,7 @@
  * 5. ポストエフェクト - 各種エフェクトのトグルとパラメータ
  */
 
-import type { FC } from 'react'
+import type { FC, RefObject } from 'react'
 import type { ViewerSettings } from '../../types'
 import { useControlPanel, type ControlPanelHandlers } from '../../hooks'
 import { Accordion } from '../../../../components/Accordion'
@@ -29,6 +29,8 @@ interface ControlPanelProps {
   settings: ViewerSettings
   /** ハンドラー */
   handlers: ControlPanelHandlers
+  /** ファイル入力用ref（インポート用） */
+  fileInputRef: RefObject<HTMLInputElement | null>
 }
 
 // ============================================
@@ -45,7 +47,7 @@ interface ControlPanelProps {
  * @param props - コンポーネントProps
  * @returns コントロールパネルUI
  */
-export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
+export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers, fileInputRef }) => {
   // フックから設定を取得
   const { checkboxes, background, hdri, light, postEffects } = useControlPanel(settings, handlers)
 
@@ -57,7 +59,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 表示設定セクション */}
       {/* グリッド、ワイヤーフレーム等の表示トグル */}
       {/* ============================================ */}
-      <Accordion title="🎮 表示設定" defaultOpen={true}>
+      <Accordion title="表示設定" defaultOpen={true}>
         <div className={styles.controls}>
           {checkboxes.map((checkbox) => (
             <CheckboxControl
@@ -74,7 +76,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 背景設定セクション */}
       {/* 背景モード（透明/単色）と色の選択 */}
       {/* ============================================ */}
-      <Accordion title="🎨 背景設定" defaultOpen={false}>
+      <Accordion title="背景設定" defaultOpen={false}>
         {/* 背景モード選択（ラジオボタン） */}
         <div className={styles.radioGroup}>
           <span className={styles.label}>{background.mode.label}:</span>
@@ -113,7 +115,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* 環境マップ（HDRI）セクション */}
       {/* HDRI選択、回転、強度の調整 */}
       {/* ============================================ */}
-      <Accordion title="🌄 環境マップ" defaultOpen={false}>
+      <Accordion title="環境マップ" defaultOpen={false}>
         {/* HDRI有効/無効トグル */}
         <CheckboxControl
           label={hdri.enabled.label}
@@ -164,7 +166,7 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
       {/* ライト設定セクション */}
       {/* ライト色、強度、位置（球面座標）の調整 */}
       {/* ============================================ */}
-      <Accordion title="💡 ライト設定" defaultOpen={false}>
+      <Accordion title="ライト設定" defaultOpen={false}>
         {/* ライト有効/無効トグル */}
         <CheckboxControl
           label={light.enabled.label}
@@ -211,42 +213,60 @@ export const ControlPanel: FC<ControlPanelProps> = ({ settings, handlers }) => {
 
       {/* ============================================ */}
       {/* ポストエフェクトセクション */}
-      {/* 各種エフェクトのトグルとパラメータ調整 */}
+      {/* 各エフェクトをサブアコーディオンでグループ化 */}
       {/* ============================================ */}
-      <Accordion title="✨ ポストエフェクト" defaultOpen={false}>
-        {/* エフェクトトグル */}
-        <div className={styles.controls}>
-          {postEffects.toggles.map((toggle) => (
+      <Accordion title="ポストエフェクト" defaultOpen={false}>
+        {/* 各エフェクトをサブアコーディオンで表示 */}
+        {postEffects.effects.map((effect) => (
+          <Accordion key={effect.name} title={effect.name} defaultOpen={false}>
+            {/* エフェクトの有効/無効トグル */}
             <CheckboxControl
-              key={toggle.label}
-              label={toggle.label}
-              checked={toggle.checked}
-              onChange={toggle.onChange}
+              label={effect.toggle.label}
+              checked={effect.toggle.checked}
+              onChange={effect.toggle.onChange}
             />
-          ))}
-        </div>
-
-        {/* エフェクトパラメータスライダー */}
-        {postEffects.sliders.map((slider) => (
-          <SliderControl
-            key={slider.label}
-            label={slider.label}
-            value={slider.value}
-            min={slider.min}
-            max={slider.max}
-            step={slider.step}
-            decimals={2}
-            onChange={slider.onChange}
-          />
+            {/* エフェクトパラメータスライダー（存在する場合） */}
+            {effect.sliders.map((slider) => (
+              <SliderControl
+                key={slider.label}
+                label={slider.label}
+                value={slider.value}
+                min={slider.min}
+                max={slider.max}
+                step={slider.step}
+                unit={slider.unit}
+                decimals={2}
+                onChange={slider.onChange}
+              />
+            ))}
+          </Accordion>
         ))}
       </Accordion>
 
       {/* ============================================ */}
-      {/* 設定リセットボタン */}
+      {/* ボタングループ */}
+      {/* リセット・エクスポート・インポート */}
       {/* ============================================ */}
-      <button className={styles.resetButton} onClick={handlers.onReset}>
-        設定リセット
-      </button>
+      <div className={styles.buttonGroup}>
+        <button className={styles.resetButton} onClick={handlers.onReset}>
+          リセット
+        </button>
+        <button className={styles.exportButton} onClick={handlers.onExportSettings}>
+          エクスポート
+        </button>
+        <button className={styles.importButton} onClick={handlers.onImportSettings}>
+          インポート
+        </button>
+      </div>
+
+      {/* 隠しファイル入力（インポート用） */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        style={{ display: 'none' }}
+        aria-hidden="true"
+      />
     </div>
   )
 }

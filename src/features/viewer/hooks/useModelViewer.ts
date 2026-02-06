@@ -63,6 +63,8 @@ interface UseModelViewerReturn {
   setDirectionalLightIntensity: (value: number) => void
   /** 設定リセット */
   resetSettings: () => void
+  /** 設定一括置換（インポート用） */
+  replaceSettings: (newSettings: ViewerSettings) => void
   /** 汎用設定更新 */
   updateSetting: UpdateSettingFn
   /** ポストエフェクト設定更新 */
@@ -173,6 +175,14 @@ export const useModelViewer = (): UseModelViewerReturn => {
     setSettings(DEFAULT_VIEWER_SETTINGS)
   }, [])
 
+  /**
+   * 設定を一括置換（インポート用）
+   * @param newSettings - 新しい設定オブジェクト
+   */
+  const replaceSettings = useCallback((newSettings: ViewerSettings) => {
+    setSettings(newSettings)
+  }, [])
+
   const setBackgroundMode = useCallback((mode: 'color' | 'hdri') => {
     updateSetting('backgroundMode', mode)
   }, [updateSetting])
@@ -196,6 +206,7 @@ export const useModelViewer = (): UseModelViewerReturn => {
     setDirectionalLightColor,
     setDirectionalLightIntensity,
     resetSettings,
+    replaceSettings,
     updateSetting,
     updatePostEffectSetting,
     togglePostEffect,

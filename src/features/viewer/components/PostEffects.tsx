@@ -43,6 +43,7 @@ import {
 } from '@react-three/postprocessing'
 import { ToneMappingMode, BlendFunction, GlitchMode } from 'postprocessing'
 import { Vector2 } from 'three'
+import { CyberpunkEffect } from '../effects/CyberpunkEffect'
 import type { PostEffectSettings } from '../types'
 
 /**
@@ -135,6 +136,15 @@ export const PostEffects: FC<PostEffectsProps> = ({ settings }) => {
     glitchDelay,
     glitchDuration,
     glitchStrength,
+
+    // ==========================================
+    // Cyberpunk（カスタムシェーダー効果）
+    // ==========================================
+    cyberpunkEnabled,
+    cyberpunkScanlineDensity,
+    cyberpunkScanlineStrength,
+    cyberpunkNoiseStrength,
+    cyberpunkRgbShiftStrength,
   } = settings
 
   /**
@@ -272,6 +282,22 @@ export const PostEffects: FC<PostEffectsProps> = ({ settings }) => {
       )
     }
 
+    // ------------------------------------------
+    // Cyberpunk カスタムエフェクト
+    // スキャンライン、ノイズ、色収差
+    // ------------------------------------------
+    if (cyberpunkEnabled) {
+      effectList.push(
+        <CyberpunkEffect
+          key="cyberpunk"
+          scanlineDensity={cyberpunkScanlineDensity}
+          scanlineStrength={cyberpunkScanlineStrength}
+          noiseStrength={cyberpunkNoiseStrength}
+          rgbShiftStrength={cyberpunkRgbShiftStrength}
+        />
+      )
+    }
+
     return effectList
   }, [
     // 依存配列: settingsの各プロパティを個別に指定
@@ -300,6 +326,11 @@ export const PostEffects: FC<PostEffectsProps> = ({ settings }) => {
     glitchDelay,
     glitchDuration,
     glitchStrength,
+    cyberpunkEnabled,
+    cyberpunkScanlineDensity,
+    cyberpunkScanlineStrength,
+    cyberpunkNoiseStrength,
+    cyberpunkRgbShiftStrength,
   ])
 
   // ------------------------------------------

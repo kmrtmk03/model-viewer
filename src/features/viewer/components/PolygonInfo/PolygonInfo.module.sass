@@ -1,0 +1,80 @@
+// ============================
+// PolygonInfo コンポーネント スタイル
+// 3Dモデルのメタ情報を表示するパネル
+// ============================
+// 注: v（variables）はVite設定でグローバルにprependされるため、
+// @useは不要
+
+// ============================
+// コンテナ
+// ============================
+
+// 主コンテナ: 右上に固定配置されるパネル
+.container
+  position: absolute
+  top: v.$spacing-md
+  right: v.$spacing-md
+  max-width: 320px
+  padding: v.$spacing-sm v.$spacing-md
+  // ガラスモーフィズム風のグラデーション背景
+  background: linear-gradient(135deg, rgba(13, 26, 46, 0.86), rgba(21, 33, 58, 0.8))
+  border: 1px solid rgba(148, 163, 184, 0.35)
+  border-radius: 12px
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35)
+  backdrop-filter: blur(6px)
+  color: rgba(255, 255, 255, 0.9)
+  line-height: 1.4
+  z-index: 40
+  // クリックイベントを透過（背後の3Dビューを操作可能に）
+  pointer-events: none
+  display: flex
+  flex-direction: column
+  gap: 2px
+
+// ============================
+// ポリゴン数セクション
+// ============================
+
+// ラベル: 小さめのキャプション
+.label
+  font-size: 11px
+  letter-spacing: 0.08em
+  font-weight: 600
+  color: rgba(148, 163, 184, 0.95)
+
+// 値: 大きく目立つ数値表示
+.value
+  font-size: 24px
+  line-height: 1.1
+  font-weight: 700
+  color: #f8fafc
+  // 等幅フォントで数値の整列を確保
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace
+
+// ============================
+// マテリアル一覧セクション
+// ============================
+
+// マテリアル行のコンテナ
+.materialRow
+  margin-top: 4px
+  padding-top: 6px
+  // 上部に区切り線
+  border-top: 1px solid rgba(148, 163, 184, 0.22)
+  display: flex
+  flex-direction: column
+  gap: 2px
+
+// マテリアルラベル
+.materialLabel
+  font-size: 11px
+  letter-spacing: 0.04em
+  color: rgba(203, 213, 225, 0.92)
+
+// マテリアルテキスト（マテリアル名の一覧）
+.materialText
+  font-size: 13px
+  color: rgba(226, 232, 240, 0.88)
+  line-height: 1.4
+  // 長いマテリアル名は折り返し
+  word-break: break-word
