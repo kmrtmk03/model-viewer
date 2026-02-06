@@ -10,6 +10,7 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 - [機能概要](#機能概要)
 - [使用技術](#使用技術)
 - [セットアップ](#セットアップ)
+- [対応ファイル形式](#対応ファイル形式)
 - [プロジェクト構成](#プロジェクト構成)
 - [アーキテクチャ](#アーキテクチャ)
 - [主要コンポーネント](#主要コンポーネント)
@@ -22,14 +23,15 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 ## 機能概要
 
 ### 3Dモデル表示
-- **GLB/GLTF形式対応**: ドラッグ&ドロップでモデル読み込み
+- **FBX/GLB/GLTF形式対応**: ドラッグ&ドロップでモデル読み込み
+- **自動正規化**: 読み込んだモデルを原点中心・適切なスケールに調整
 - **Wireframe表示**: メッシュ構造の確認
 - **自動回転**: モデルの360度プレビュー
 
 ### 環境設定
 - **HDRI環境マップ**: 3種類のプリセット（Sand、Sunset、Studio）
 - **環境光調整**: 強度・回転角度のリアルタイム調整
-- **背景設定**: 透明/単色の切り替え、カラーピッカーで色選択
+- **背景設定**: 単色/HDRIの切り替え、カラーピッカーで色選択
 
 ### ライティング
 - **ディレクショナルライト**: 位置（球面座標）、色、強度を調整
@@ -42,6 +44,7 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 ### UI/UX
 - **アコーディオン形式パネル**: セクション別に折りたたみ可能
 - **再利用可能なUIコンポーネント**: SliderControl、CheckboxControl、SelectControl
+- **設定の入出力**: ビューアー設定をJSON形式でエクスポート/インポート
 
 ---
 
@@ -85,7 +88,7 @@ React Three Fiberを使用した高品質な3Dモデルビューアー アプリ
 
 ### 必要な環境
 
-- **Node.js**: v23.7.0 以上
+- **Node.js**: LTS版推奨（`node -v` で確認）
 - **パッケージマネージャー**: pnpm（推奨）
 
 ### インストール
@@ -120,6 +123,20 @@ pnpm build
 ```bash
 pnpm preview
 ```
+
+---
+
+## 対応ファイル形式
+
+| 拡張子 | ローダー | 備考 |
+|--------|----------|------|
+| `.fbx` | `FBXLoader` | 単一ファイルで読み込み可能 |
+| `.glb` | `GLTFLoader` | 単一ファイルで読み込み可能 |
+| `.gltf` | `GLTFLoader` | 外部`.bin`やテクスチャ参照がある場合は同一参照が必要 |
+
+補足:
+- ドラッグ&ドロップ時は最初の1ファイルのみ処理します。
+- 非対応形式をドロップした場合はUI上にエラーメッセージを表示します。
 
 ---
 
@@ -249,7 +266,7 @@ flowchart TD
 
 ### ModelViewer
 
-メインのビューアーコンポーネント。`Canvas`内で3Dシーンを構築。
+メインのビューアーコンポーネント。`Canvas`内で3Dシーンを構築し、設定状態・モデル読み込み・設定JSON入出力を統合。
 
 ```tsx
 <ModelViewer
@@ -337,6 +354,22 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
 }
 ```
 
+### 設定JSONのエクスポート/インポート
+
+`ControlPanel` の `エクスポート` / `インポート` ボタンで、現在設定をJSONとして保存・復元できます。  
+インポート時は `settingsValidator.ts` でランタイム検証を行い、不正な形式の読み込みを防止します。
+
+```json
+{
+  "version": "1.0",
+  "exportedAt": "2026-02-06T12:34:56.000Z",
+  "settings": {
+    "wireframe": false,
+    "showGrid": true
+  }
+}
+```
+
 ### HDRI追加
 
 ```typescript
@@ -357,6 +390,9 @@ export const HDRI_LIST: readonly HdriItem[] = [
 export default defineConfig({
   base: '/',
   plugins: [react()],
+  server: {
+    host: true,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -367,8 +403,8 @@ export default defineConfig({
       sass: {
         // variables と mixins を自動インポート
         additionalData: `
-@use "src/styles/variables/_index.sass" as v
-@use "src/styles/mixins/_index.sass" as m
+@use "${path.resolve(__dirname, 'src/styles/variables/_index.sass')}" as v
+@use "${path.resolve(__dirname, 'src/styles/mixins/_index.sass')}" as m
 `,
       },
     },
