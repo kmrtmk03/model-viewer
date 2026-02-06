@@ -12,6 +12,7 @@ import {
   SphereGeometry,
   TorusGeometry,
   type BufferGeometry,
+  type Material,
   type Mesh,
   type Group,
   type MeshStandardMaterial,
@@ -26,6 +27,8 @@ interface ModelProps {
   externalModel?: Group | null
   /** ポリゴン数の更新通知 */
   onPolygonCountChange?: (count: number) => void
+  /** マテリアル一覧の更新通知 */
+  onMaterialListChange?: (materials: string[]) => void
 }
 
 /**
@@ -60,6 +63,35 @@ const getTriangleCountFromObject = (object: Object3D): number => {
 }
 
 /**
+ * Materialを表示用ラベルに変換
+ */
+const getMaterialLabel = (material: Material): string => {
+  const materialName = material.name?.trim()
+  return materialName ? materialName : material.type
+}
+
+/**
+ * Object3D配下で使用されているマテリアル一覧（ユニーク）を取得
+ */
+const getMaterialListFromObject = (object: Object3D): string[] => {
+  const materialSet = new Set<string>()
+
+  object.traverse((child) => {
+    if (!(child as Mesh).isMesh) return
+
+    const mesh = child as Mesh
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+    materials.forEach((material) => {
+      if (material) {
+        materialSet.add(getMaterialLabel(material as Material))
+      }
+    })
+  })
+
+  return Array.from(materialSet)
+}
+
+/**
  * サンプルモデルの三角形数（構成ジオメトリから計算）
  */
 const SAMPLE_TRIANGLE_COUNT = (() => {
@@ -77,20 +109,29 @@ const SAMPLE_TRIANGLE_COUNT = (() => {
   return total
 })()
 
+const SAMPLE_MATERIAL_LIST = ['MeshStandardMaterial']
+
 /**
  * サンプル3Dモデル（フォールバック用）
  */
-const SampleModel: FC<{ wireframe: boolean; autoRotate: boolean; onPolygonCountChange?: (count: number) => void }> = ({
+const SampleModel: FC<{
+  wireframe: boolean
+  autoRotate: boolean
+  onPolygonCountChange?: (count: number) => void
+  onMaterialListChange?: (materials: string[]) => void
+}> = ({
   wireframe,
   autoRotate,
   onPolygonCountChange,
+  onMaterialListChange,
 }) => {
   const groupRef = useRef<Group>(null)
   const torusRef = useRef<Mesh>(null)
 
   useEffect(() => {
     onPolygonCountChange?.(SAMPLE_TRIANGLE_COUNT)
-  }, [onPolygonCountChange])
+    onMaterialListChange?.(SAMPLE_MATERIAL_LIST)
+  }, [onPolygonCountChange, onMaterialListChange])
 
   // アニメーション
   useFrame((_, delta) => {
@@ -146,17 +187,20 @@ const ExternalModel: FC<{
   autoRotate: boolean
   wireframe: boolean
   onPolygonCountChange?: (count: number) => void
+  onMaterialListChange?: (materials: string[]) => void
 }> = ({
   model,
   autoRotate,
   wireframe,
   onPolygonCountChange,
+  onMaterialListChange,
 }) => {
   const groupRef = useRef<Group>(null)
 
   useEffect(() => {
     onPolygonCountChange?.(getTriangleCountFromObject(model))
-  }, [model, onPolygonCountChange])
+    onMaterialListChange?.(getMaterialListFromObject(model))
+  }, [model, onPolygonCountChange, onMaterialListChange])
 
   // ワイヤーフレーム設定の反映
   // モデル内の全メッシュを走査し、マテリアルのwireframeプロパティを更新する
@@ -199,7 +243,12 @@ const ExternalModel: FC<{
 /**
  * 3Dモデルコンポーネント（ビュー専念）
  */
-export const Model: FC<ModelProps> = ({ settings, externalModel, onPolygonCountChange }) => {
+export const Model: FC<ModelProps> = ({
+  settings,
+  externalModel,
+  onPolygonCountChange,
+  onMaterialListChange,
+}) => {
   const { wireframe, autoRotate } = settings
 
   // 外部モデルがあれば表示、なければサンプルモデル
@@ -210,9 +259,17 @@ export const Model: FC<ModelProps> = ({ settings, externalModel, onPolygonCountC
         autoRotate={autoRotate}
         wireframe={wireframe}
         onPolygonCountChange={onPolygonCountChange}
+        onMaterialListChange={onMaterialListChange}
       />
     )
   }
 
-  return <SampleModel wireframe={wireframe} autoRotate={autoRotate} onPolygonCountChange={onPolygonCountChange} />
+  return (
+    <SampleModel
+      wireframe={wireframe}
+      autoRotate={autoRotate}
+      onPolygonCountChange={onPolygonCountChange}
+      onMaterialListChange={onMaterialListChange}
+    />
+  )
 }

@@ -19,6 +19,7 @@ import styles from './ModelViewer.module.sass'
  */
 export const ModelViewer: FC = () => {
   const [polygonCount, setPolygonCount] = useState(0)
+  const [materialList, setMaterialList] = useState<string[]>([])
 
   // フックから設定と操作関数を取得
   const {
@@ -97,6 +98,10 @@ export const ModelViewer: FC = () => {
     setPolygonCount(count)
   }, [])
 
+  const handleMaterialListChange = useCallback((materials: string[]) => {
+    setMaterialList(materials)
+  }, [])
+
   return (
     <div
       className={styles.container}
@@ -124,6 +129,7 @@ export const ModelViewer: FC = () => {
           settings={settings}
           externalModel={modelObject}
           onPolygonCountChange={handlePolygonCountChange}
+          onMaterialListChange={handleMaterialListChange}
         />
 
         {/* ポストエフェクト */}
@@ -177,7 +183,14 @@ export const ModelViewer: FC = () => {
 
       {/* ポリゴン数表示 */}
       <div className={styles.polygonInfo}>
-        <span>ポリゴン数: {polygonCount.toLocaleString()}</span>
+        <div className={styles.polygonLabel}>POLYGONS</div>
+        <div className={styles.polygonValue}>{polygonCount.toLocaleString()}</div>
+        <div className={styles.materialRow}>
+          <span className={styles.materialLabel}>マテリアル</span>
+          <span className={styles.materialText}>
+            {materialList.length > 0 ? materialList.join(', ') : '-'}
+          </span>
+        </div>
       </div>
 
       {/* コントロールパネル */}
