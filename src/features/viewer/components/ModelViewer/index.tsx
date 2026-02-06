@@ -12,6 +12,7 @@ import { Environment } from '../Environment'
 import { Model } from '../Model'
 import { ControlPanel } from '../ControlPanel'
 import { PostEffects } from '../PostEffects'
+import { PolygonInfo } from '../PolygonInfo'
 import styles from './ModelViewer.module.sass'
 
 /**
@@ -181,17 +182,8 @@ export const ModelViewer: FC = () => {
         </div>
       )}
 
-      {/* ポリゴン数表示 */}
-      <div className={styles.polygonInfo}>
-        <div className={styles.polygonLabel}>POLYGONS</div>
-        <div className={styles.polygonValue}>{polygonCount.toLocaleString()}</div>
-        <div className={styles.materialRow}>
-          <span className={styles.materialLabel}>マテリアル</span>
-          <span className={styles.materialText}>
-            {materialList.length > 0 ? materialList.join(', ') : '-'}
-          </span>
-        </div>
-      </div>
+      {/* ポリゴン数・マテリアル情報表示 */}
+      <PolygonInfo polygonCount={polygonCount} materialList={materialList} />
 
       {/* コントロールパネル */}
       <ControlPanel settings={settings} handlers={handlers} fileInputRef={fileInputRef} />
