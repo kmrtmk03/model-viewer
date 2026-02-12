@@ -23,6 +23,7 @@ import {
   isMesh,
 } from '../utils/modelAnalyzer'
 import { RippleSphere } from './RippleSphere'
+import { useModelDeform } from '../hooks/useModelDeform'
 
 // ============================
 // 型定義
@@ -60,6 +61,9 @@ const ExternalModel: FC<{
 }) => {
     const groupRef = useRef<Group>(null)
 
+    // ボコボコ変形エフェクトフック
+    const { triggerDeform } = useModelDeform(model)
+
     useEffect(() => {
       onPolygonCountChange?.(getTriangleCountFromObject(model))
       onMaterialListChange?.(getMaterialListFromObject(model))
@@ -96,8 +100,15 @@ const ExternalModel: FC<{
       }
     })
 
+    /**
+     * モデルクリック時にボコボコ変形をトリガー
+     */
+    const handleClick = () => {
+      triggerDeform()
+    }
+
     return (
-      <group ref={groupRef}>
+      <group ref={groupRef} onClick={handleClick}>
         <primitive object={model} />
       </group>
     )
