@@ -137,7 +137,7 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
   wireframe: false,
   showGrid: true,
   showAxes: false,
-  backgroundColor: '#1a1a2e',
+  backgroundColor: '#0a0a12',
   autoRotate: false,
   lightAzimuth: 45,
   lightElevation: 60,
@@ -157,8 +157,8 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerSettings = {
  * デフォルトのカメラ設定
  */
 export const DEFAULT_CAMERA_SETTINGS: CameraSettings = {
-  position: [3, 3, 3],
-  fov: 45,
+  position: [0, 0, 6],
+  fov: 50,
   near: 0.1,
   far: 1000,
 }

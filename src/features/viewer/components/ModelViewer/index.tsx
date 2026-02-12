@@ -141,7 +141,7 @@ export const ModelViewer: FC = () => {
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={1}
+          minDistance={3.5}
           maxDistance={50}
           makeDefault
         />
