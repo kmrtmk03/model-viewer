@@ -8,23 +8,30 @@
  * 仕組み:
  * 1. モデル内の全メッシュを走査
  * 2. 各マテリアルの onBeforeCompile でノイズ関数と変形処理を頂点シェーダーに注入
- * 3. useFrame で時間・振幅のuniformを毎フレーム更新
- * 4. クリック時に振幅を上げ、自動減衰させる
+ * 3. 共通フック `useDeformAmplitude` で振幅・時間を管理
+ * 4. useFrame で全マテリアルの uniform を毎フレーム更新
+ *
+ * 設計方針:
+ * - 振幅管理ロジックは `useDeformAmplitude` に委譲（球体用と共通）
+ * - ノイズGLSLコードは `noiseShader.ts` から取得（共通モジュール）
+ * - `_d` サフィックス付き関数名で既存シェーダーとの名前衝突を回避
  */
 
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, Material, Mesh, Object3D } from 'three'
 import { isMesh } from '../utils/modelAnalyzer'
+import { SIMPLEX_NOISE_GLSL_INJECTED } from '../shaders/noiseShader'
+import { useDeformAmplitude } from './useDeformAmplitude'
 
 // ============================
 // 定数
 // ============================
 
-/** クリック時の最大振幅 */
+/** クリック時の最大振幅（外部モデル用、球体より控えめに設定） */
 const MAX_AMPLITUDE = 0.07
 
-/** 振幅の減衰速度 */
+/** 振幅の減衰速度（大きいほど速く元に戻る） */
 const DECAY_SPEED = 3.0
 
 /** ノイズの周波数 */
@@ -35,72 +42,26 @@ const NOISE_FREQUENCY = 2.4
 // ============================
 
 /**
- * 3Dシンプレックスノイズ関数（GLSLコード）
- * 頂点シェーダーに注入するノイズ生成関数
+ * onBeforeCompile で注入する uniform 宣言
+ * ノイズ関数と合わせて頂点シェーダーの先頭に追加される
  */
-const NOISE_GLSL = `
+const DEFORM_UNIFORMS_GLSL = `
 // --- ボコボコ変形エフェクト用 uniform ---
 uniform float uDeformTime;
 uniform float uDeformAmplitude;
 uniform float uDeformFrequency;
-
-// --- シンプレックスノイズ関数 ---
-vec3 mod289_d(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec4 mod289_d(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec4 permute_d(vec4 x) { return mod289_d(((x * 34.0) + 1.0) * x); }
-vec4 taylorInvSqrt_d(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-float snoise_d(vec3 v) {
-  const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
-  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-  vec3 i = floor(v + dot(v, C.yyy));
-  vec3 x0 = v - i + dot(i, C.xxx);
-  vec3 g = step(x0.yzx, x0.xyz);
-  vec3 l = 1.0 - g;
-  vec3 i1 = min(g.xyz, l.zxy);
-  vec3 i2 = max(g.xyz, l.zxy);
-  vec3 x1 = x0 - i1 + C.xxx;
-  vec3 x2 = x0 - i2 + C.yyy;
-  vec3 x3 = x0 - D.yyy;
-  i = mod289_d(i);
-  vec4 p = permute_d(permute_d(permute_d(
-    i.z + vec4(0.0, i1.z, i2.z, 1.0))
-    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-  float n_ = 0.142857142857;
-  vec3 ns = n_ * D.wyz - D.xzx;
-  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-  vec4 x_ = floor(j * ns.z);
-  vec4 y_ = floor(j - 7.0 * x_);
-  vec4 x = x_ * ns.x + ns.yyyy;
-  vec4 y = y_ * ns.x + ns.yyyy;
-  vec4 h = 1.0 - abs(x) - abs(y);
-  vec4 b0 = vec4(x.xy, y.xy);
-  vec4 b1 = vec4(x.zw, y.zw);
-  vec4 s0 = floor(b0) * 2.0 + 1.0;
-  vec4 s1 = floor(b1) * 2.0 + 1.0;
-  vec4 sh = -step(h, vec4(0.0));
-  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-  vec3 p0 = vec3(a0.xy, h.x);
-  vec3 p1 = vec3(a0.zw, h.y);
-  vec3 p2 = vec3(a1.xy, h.z);
-  vec3 p3 = vec3(a1.zw, h.w);
-  vec4 norm = taylorInvSqrt_d(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-  m = m * m;
-  return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-}
 `
 
 /**
- * 頂点変形コード（頂点シェーダーの #include <begin_vertex> を置き換え）
+ * 頂点変形コード
+ * Three.js の `#include <begin_vertex>` を置き換えて変形を適用
+ * `snoise_d` は注入されたノイズ関数（_d サフィックス付き）
  */
 const DEFORM_VERTEX_GLSL = `
 vec3 transformed = vec3(position);
 
 // ノイズベースの変形を適用
+// 2層のノイズを異なる周波数・方向で重ねて自然なうねりを生成
 float dn1 = snoise_d(transformed * uDeformFrequency + uDeformTime * 0.8) * 0.7;
 float dn2 = snoise_d(transformed * uDeformFrequency * 1.5 - uDeformTime * 0.5) * 0.3;
 float deformDisp = (dn1 + dn2) * uDeformAmplitude;
@@ -111,6 +72,14 @@ transformed += normal * deformDisp;
 // 型定義
 // ============================
 
+/** uniform オブジェクトの型定義 */
+interface DeformUniforms {
+  uDeformTime: { value: number }
+  uDeformAmplitude: { value: number }
+  uDeformFrequency: { value: number }
+}
+
+/** フックの戻り値 */
 interface UseModelDeformReturn {
   /** クリック時に変形をトリガー */
   triggerDeform: () => void
@@ -122,24 +91,23 @@ interface UseModelDeformReturn {
  * @returns triggerDeform 関数
  */
 export const useModelDeform = (model: Group | null): UseModelDeformReturn => {
-  // 振幅と時間の管理
-  const amplitudeRef = useRef(0)
-  const timeRef = useRef(0)
+  // 共通の振幅管理フック（外部モデル用のパラメータを設定）
+  const { amplitudeRef, timeRef, triggerDeform } = useDeformAmplitude({
+    maxAmplitude: MAX_AMPLITUDE,
+    decaySpeed: DECAY_SPEED,
+  })
 
   // 注入したuniformの参照を保持（毎フレーム更新用）
-  const uniformsListRef = useRef<Array<{
-    uDeformTime: { value: number }
-    uDeformAmplitude: { value: number }
-    uDeformFrequency: { value: number }
-  }>>([])
+  const uniformsListRef = useRef<DeformUniforms[]>([])
 
   /**
    * モデルの全マテリアルにシェーダー注入を実行
+   * モデルが変わった時に再注入される
    */
   useEffect(() => {
     if (!model) return
 
-    const uniformsList: typeof uniformsListRef.current = []
+    const uniformsList: DeformUniforms[] = []
 
     model.traverse((child: Object3D) => {
       if (!isMesh(child)) return
@@ -148,8 +116,8 @@ export const useModelDeform = (model: Group | null): UseModelDeformReturn => {
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
 
       materials.forEach((mat: Material) => {
-        // カスタム uniform を定義
-        const deformUniforms = {
+        // マテリアルごとにuniformインスタンスを生成
+        const deformUniforms: DeformUniforms = {
           uDeformTime: { value: 0 },
           uDeformAmplitude: { value: 0 },
           uDeformFrequency: { value: NOISE_FREQUENCY },
@@ -164,8 +132,11 @@ export const useModelDeform = (model: Group | null): UseModelDeformReturn => {
           shader.uniforms.uDeformAmplitude = deformUniforms.uDeformAmplitude
           shader.uniforms.uDeformFrequency = deformUniforms.uDeformFrequency
 
-          // 頂点シェーダーにノイズ関数を挿入（void main() の前に追加）
-          shader.vertexShader = NOISE_GLSL + '\n' + shader.vertexShader
+          // 頂点シェーダーの先頭にuniform宣言とノイズ関数を挿入
+          shader.vertexShader =
+            DEFORM_UNIFORMS_GLSL + '\n' +
+            SIMPLEX_NOISE_GLSL_INJECTED + '\n' +
+            shader.vertexShader
 
           // #include <begin_vertex> を変形付きコードで置換
           shader.vertexShader = shader.vertexShader.replace(
@@ -182,23 +153,8 @@ export const useModelDeform = (model: Group | null): UseModelDeformReturn => {
     uniformsListRef.current = uniformsList
   }, [model])
 
-  /** クリック時に変形をトリガー */
-  const triggerDeform = useCallback(() => {
-    amplitudeRef.current = MAX_AMPLITUDE
-  }, [])
-
-  /** フレームごとの更新 */
-  useFrame((_, delta) => {
-    timeRef.current += delta
-
-    // 振幅を滑らかに減衰
-    if (amplitudeRef.current > 0.001) {
-      amplitudeRef.current *= Math.exp(-delta * DECAY_SPEED)
-    } else {
-      amplitudeRef.current = 0
-    }
-
-    // 全マテリアルのuniformを更新
+  /** フレームごとに全マテリアルのuniformを更新 */
+  useFrame(() => {
     for (const uniforms of uniformsListRef.current) {
       uniforms.uDeformTime.value = timeRef.current
       uniforms.uDeformAmplitude.value = amplitudeRef.current

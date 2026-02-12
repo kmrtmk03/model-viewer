@@ -1,16 +1,21 @@
 /**
- * ボコボコ変形エフェクト付き球体コンポーネント
+ * 変形エフェクト付き球体コンポーネント
  * @description
- * funtech.inc の球体を参考にした、クリックで表面がボコボコ変形するインタラクティブな球体。
+ * クリックで表面がボコボコと変形するインタラクティブな球体。
  *
  * 機能:
- * - 画面中央に大きく表示される球体
- * - クリック時にノイズベースの全体変形が発生
- * - ダークなマット質感＋フレネルハイライト
+ * - 画面中央に大きく表示される高解像度球体
+ * - クリック時にノイズベースの全体変形が発生し、時間経過で元に戻る
+ * - カスタムシェーダーによるフレネルハイライト付きマット質感
  * - ゆっくりとした自動回転
+ *
+ * 構成:
+ * - ビュー: このコンポーネント（描画のみ）
+ * - ロジック: `useSphereDeform` フック（変形の状態管理）
+ * - シェーダー: `deformSphereShader.ts`（GLSL定義）
  */
 
-import { useRef, useMemo, type FC } from 'react'
+import { useRef, useMemo, useEffect, type FC } from 'react'
 import { useFrame } from '@react-three/fiber'
 import {
   Vector3,
@@ -18,14 +23,14 @@ import {
   type Mesh,
   FrontSide,
 } from 'three'
-import { vertexShader, fragmentShader } from '../shaders/rippleSphereShader'
-import { useRippleEffect } from '../hooks/useRippleEffect'
+import { vertexShader, fragmentShader } from '../shaders/deformSphereShader'
+import { useSphereDeform } from '../hooks/useSphereDeform'
 
 // ============================
 // 型定義
 // ============================
 
-interface RippleSphereProps {
+interface DeformSphereProps {
   /** ポリゴン数変更通知コールバック */
   onPolygonCountChange?: (count: number) => void
   /** マテリアル一覧変更通知コールバック */
@@ -45,34 +50,34 @@ const SPHERE_SEGMENTS = 128
 /** 自動回転速度 */
 const ROTATION_SPEED = 0.08
 
-/** ベースカラー（ダークブラウン / funtech風） */
+/** ベースカラー（赤系） */
 const BASE_COLOR = new Vector3(0.6, 0.08, 0.08)
 
-/** フレネルハイライト色 */
+/** フレネルハイライト色（赤系） */
 const FRESNEL_COLOR = new Vector3(0.8, 0.2, 0.2)
 
-/** マテリアル名リスト */
-const MATERIAL_LIST = ['RippleShaderMaterial']
+/** マテリアル名リスト（情報パネル表示用） */
+const MATERIAL_LIST = ['DeformShaderMaterial']
 
 /**
- * ボコボコ変形エフェクト付き球体コンポーネント
+ * 変形エフェクト付き球体コンポーネント
  */
-export const RippleSphere: FC<RippleSphereProps> = ({
+export const DeformSphere: FC<DeformSphereProps> = ({
   onPolygonCountChange,
   onMaterialListChange,
 }) => {
   const meshRef = useRef<Mesh>(null)
 
-  // 変形エフェクトフック
-  const { materialRef, triggerDeform } = useRippleEffect()
+  // 変形エフェクトフック（ロジック分離）
+  const { materialRef, triggerDeform } = useSphereDeform()
 
-  // シェーダーのuniform定義
+  // シェーダーのuniform定義（マウント時に一度だけ生成）
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
     uAmplitude: { value: 0 },    // 変形の振幅（クリックで上昇、自動減衰）
     uFrequency: { value: 0.2 },  // ノイズの周波数（小さいほど大きく丸い変形）
 
-    // マテリアル
+    // マテリアルカラー
     uBaseColor: { value: BASE_COLOR },
     uFresnelColor: { value: FRESNEL_COLOR },
     uFresnelPower: { value: 3.0 },
@@ -83,8 +88,8 @@ export const RippleSphere: FC<RippleSphereProps> = ({
     return new SphereGeometry(SPHERE_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS)
   }, [])
 
-  // ポリゴン数・マテリアル情報の通知
-  useMemo(() => {
+  // ポリゴン数・マテリアル情報の通知（副作用のため useEffect を使用）
+  useEffect(() => {
     if (geometry) {
       const indexCount = geometry.index ? geometry.index.count : 0
       const triangleCount = indexCount / 3

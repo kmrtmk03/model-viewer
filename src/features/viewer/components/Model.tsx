@@ -1,10 +1,10 @@
 /**
  * 3Dモデルコンポーネント
- * @description 外部モデルまたは波紋エフェクト付き球体を表示（ビュー専念）
+ * @description 外部モデルまたは変形エフェクト付き球体を表示（ビュー専念）
  *
  * このコンポーネントは以下の責務を持ちます:
- * - 波紋エフェクト付き球体の表示（外部モデル未読み込み時）
- * - 外部GLB/FBXモデルの表示
+ * - 変形エフェクト付き球体の表示（外部モデル未読み込み時）
+ * - 外部GLB/FBXモデルの表示（クリックでボコボコ変形エフェクト付き）
  * - ワイヤーフレーム表示の切り替え
  * - 自動回転アニメーション
  * - ポリゴン数・マテリアル情報の親への通知
@@ -22,7 +22,7 @@ import {
   getMaterialListFromObject,
   isMesh,
 } from '../utils/modelAnalyzer'
-import { RippleSphere } from './RippleSphere'
+import { DeformSphere } from './DeformSphere'
 import { useModelDeform } from '../hooks/useModelDeform'
 
 // ============================
@@ -139,7 +139,7 @@ export const Model: FC<ModelProps> = ({
   }
 
   return (
-    <RippleSphere
+    <DeformSphere
       onPolygonCountChange={onPolygonCountChange}
       onMaterialListChange={onMaterialListChange}
     />
